@@ -1,0 +1,205 @@
+/*!
+ * Workflower
+ * A simple workflow editor
+ * https://github.com/workflower-js/workflower
+ */
+.workflower {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	-webkit-touch-callout: none;
+	user-select: none;
+
+	.workflower-board {
+		width: 2000px;
+		height: 2000px;
+		position: absolute;
+		top: 0;
+		left: 0;
+    background-color: #08181c;
+    background-image: linear-gradient(45deg, rgba(0, 0, 0, 0) 48%, rgba(255, 255, 255, 0.18) 50%, rgba(0, 0, 0, 0) 52%);
+    background-size: 10px;
+	}
+
+	svg.workflower-paths {
+		width: 100%;
+		height: 100%;
+		position: absolute;
+		top: 0;
+		left: 0;
+
+		path {
+			stroke-dasharray: 0;
+			fill: transparent;
+			stroke: rgb(47, 134, 213);
+			stroke-width: 2;
+
+			&:hover {
+				stroke-width: 4;
+				stroke: #a8b938;
+				cursor: cell;
+			}
+		}
+	}
+
+	.workflower-node {
+		//background-color: #364156;
+		border-radius: 5px;
+		width: 100px;
+		position: absolute;
+		//box-shadow: 3px 3px 5px #2a3344;
+		transition: 0.3s;
+    overflow: hidden;
+
+		&:hover {
+			//box-shadow: 3px 3px 5px #222836;
+		}
+
+		> h3 {
+			background-color: #45536e;
+			color: #ffffff;
+			font-size: 14px;
+			text-align: center;
+			border-radius: 5px 5px 0 0;
+			margin: 0;
+			padding: 5px 0;
+			cursor: move;
+
+			.remove, .setting {
+				position: absolute;
+				top: 5px;
+				right: 4px;
+				background-color: #323c50;
+				padding: 0 5px 2px;
+				border-radius: 4px;
+				color: #3f4c65;
+				font-family: Tahoma, serif;
+				font-weight: normal;
+				cursor: pointer;
+				transition: background-color 0.3s;
+
+				&:after { content: "x"; display: block; }
+				&:hover { background-color: #a30f0f;  }
+			}
+
+			.setting {
+				width: 11px;
+				height: 11px;
+				right: auto;
+				left: 3px;
+				padding: 4px;
+				fill: #697896;
+
+				&:after { display: none; }
+				&:hover { background-color: #8396bb; fill: #2e3542  }
+			}
+		}
+
+		&:after {
+			content: " ";
+			height: 1px;
+			display: block;
+			clear: both;
+		}
+
+    &.type-3,
+    &.type-4 {
+      .workflower-label {
+        position: relative;
+        left: 200%;
+      }
+    }
+
+    &.type-0 {
+      h4:empty:before {
+        content: '开始';
+        opacity: .5;
+      }
+    }
+
+    &.type-2 {
+      h4:empty:before {
+        content: '结束';
+        opacity: .5;
+      }
+    }
+	}
+
+	.workflower-inputs {
+		margin-left: -5px;
+		float: left;
+
+		.workflower-point {
+			margin: 2px 4px 0 0;
+			float: left;
+		}
+	}
+
+	.workflower-outputs {
+		margin-right: -5px;
+		float: right;
+		text-align: right;
+
+		.workflower-point {
+			margin: 2px 0 0 4px;
+			cursor: pointer;
+			float: right;
+		}
+	}
+
+	.workflower-label {
+		margin: 20px 0;
+		font-size: 12px;
+		font-family: sans-serif;
+		color: #697690;
+		cursor: default;
+
+    .workflower-picture {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+      margin: auto;
+      overflow: hidden;
+
+      img {
+        max-width: 100%;
+      }
+
+    }
+
+    h4 {
+      text-align: center;
+      margin-top: 5px;
+
+      &:empty:before {
+        content: '未命名节点';
+        opacity: .5;
+      }
+    }
+	}
+
+	.workflower-point {
+		background-color: gray;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+    margin: auto;
+
+		&.selected {
+			background-color: #ffe63f;
+		}
+
+    &.status-0 {
+      background-color: green;
+    }
+    &.status-1 {
+      background-color: red;
+    }
+    &.status-2 {
+      background-color: gray;
+    }
+	}
+}
