@@ -2,7 +2,7 @@
   "name": "workflower",
   "description": "A Simple Worlflow Framework for JavaScript.",
   "homepage": "https://github.com/workflower-js/workflower",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": {
     "name": "Colin",
     "email": "mail@luozhihua.com",
@@ -12,6 +12,7 @@
     "dev": "webpack-dev-server --open --port 9998 --host 0.0.0.0 --inline --config ./build/dev",
     "dist": "rm -rf ./dist && mkdir ./dist && webpack --config ./build/prod"
   },
+  "main": "dist/workflower.js",
   "license": "MIT",
   "devDependencies": {
     "autoprefixer": "^6.7.7",
