@@ -65,13 +65,10 @@ export default class Workflow extends Watch {
    */
   initNodes() {
     this.options.nodes.forEach(data => {
+      let node = this.createNode(data)
 
-      // if (data.elementType.toString() !== '4') {
-        let node = this.createNode(data)
-        this.nodes[data.id] = node
-
-        node.renderTo(this.$board)
-      // }
+      this.nodes[data.id] = node
+      node.renderTo(this.$board)
     })
   }
 

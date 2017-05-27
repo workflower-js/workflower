@@ -149,7 +149,7 @@
 	}
 
 	.workflower-label {
-		margin: 20px 0;
+		margin: 20px 0 6px;
 		font-size: 12px;
 		font-family: sans-serif;
 		color: #697690;
@@ -172,7 +172,7 @@
 
     h4 {
       text-align: center;
-      margin-top: 5px;
+      margin: 5px;
 
       &:empty:before {
         content: '未命名节点';

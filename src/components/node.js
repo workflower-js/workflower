@@ -4,7 +4,7 @@ import Curve from './curve'
 let cache = {}
 
 export default class Node extends Watch {
-  constructor(data) {
+  constructor (data, options = {}) {
     super()
 
     this.data = data
@@ -15,8 +15,15 @@ export default class Node extends Watch {
     this.top = 0
     this.$element = this.format()
     this.$point = this.$element.getElementsByClassName('workflower-point')[0]
+    this.$picture = this.$element.getElementsByClassName('workflower-img')[0]
     this.watchProps()
     this.initEvents()
+
+    if (typeof options.setPicture === 'function') {
+      options.setPicture().then(url => {
+        this.setPicture(url)
+      })
+    }
   }
 
   static getNodeById(id) {
@@ -31,6 +38,12 @@ export default class Node extends Watch {
     }
   }
 
+  setPicture(url) {
+    if (url) {
+      this.$picture.src = url
+    }
+  }
+
   getPoint() {
     let offset = {left: 0, top: 0}
     let width = this.$point.offsetWidth / 2
@@ -40,7 +53,6 @@ export default class Node extends Watch {
     offset.height = height
     offset.left = this.$point.offsetLeft + parseInt(this.left)
     offset.top = this.$point.offsetTop + parseInt(this.top) + height
-
 
     return offset
   }
@@ -54,11 +66,7 @@ export default class Node extends Watch {
   }
 
   initEvents() {
-    this.on({
-      'offsetUpdate': () => {
 
-      }
-    })
   }
 
   /**
@@ -105,21 +113,11 @@ export default class Node extends Watch {
       
         <div class="workflower-label">
           <div class="workflower-picture">
-            <img width="80" src="https://cn.vuejs.org/images/logo.png" alt="">
+            <img class="workflower-img" width="80" data-src="" alt="">
           </div>
           <h4>${taskName}</h4>
         </div>
-        <div class="workflower-point status-${taskStatus}"></div>
-        
-      
-        <!--<div class="workflower-inputs">-->
-          <!--<span class="workflower-point"></span>-->
-        <!--</div>-->
-        <!---->
-        <!--<div class="workflower-outputs">-->
-          <!--<span class="workflower-point"></span>-->
-        <!--</div>-->
-        
+        <div class="workflower-point status-${taskStatus}"></div> 
       </div>`
 
     let wrapper = document.createElement('div')
