@@ -6,6 +6,9 @@ const { SRC_PATH } = require('./utils')
 const base = require('./base')
 
 const dev = {
+  entry: {
+    main: path.resolve(TEST_PATH, 'test')
+  },
   devtool: 'source-map',
   devServer: {
     contentBase: [

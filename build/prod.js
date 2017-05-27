@@ -24,9 +24,9 @@ const prod = {
   plugins: [
     // new ExtractTextPlugin("styles.[hash:7].css"),
     new OptimizeCSSPlugin(),
-    new HtmlWebpackPlugin({
-      template: path.resolve(SRC_PATH, 'index.html')
-    }),
+    // new HtmlWebpackPlugin({
+    //   template: path.resolve(SRC_PATH, 'index.html')
+    // }),
     new webpack.LoaderOptionsPlugin({
       minimize: true
     }),
