@@ -10,7 +10,8 @@
   },
   "scripts": {
     "dev": "webpack-dev-server --open --port 9998 --host 0.0.0.0 --inline --config ./build/dev",
-    "dist": "rm -rf ./dist && mkdir ./dist && webpack --config ./build/prod"
+    "dist": "rm -rf ./dist && mkdir ./dist && webpack --config ./build/prod",
+    "prepublish": "npm run dist"
   },
   "main": "dist/workflower.js",
   "license": "MIT",
