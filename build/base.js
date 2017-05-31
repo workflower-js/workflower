@@ -6,6 +6,8 @@ module.exports = {
     main: path.resolve(SRC_PATH, 'main')
   },
   output: {
+    library: 'workflower',
+    libraryTarget: 'umd',
     path: DIST_PATH,
     filename: 'workflower.js',
     publicPath: '/'
