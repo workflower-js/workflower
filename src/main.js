@@ -4,8 +4,7 @@ import Watch from './components/watch'
 import Node from './components/node'
 import Curve from './components/curve'
 
-export default class Workflow extends Watch {
-
+class Workflow extends Watch {
 
   static ROOTS = 'ROOTS'
 
@@ -280,3 +279,7 @@ export default class Workflow extends Watch {
     }
   }
 }
+
+module.exports = exports = Workflow
+
+export default Workflow
