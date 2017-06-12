@@ -30,7 +30,12 @@ class Workflow extends Watch {
     this.nodes = {}
     this.lines = {}
 
+    if (this.options.events) {
+      this.on(this.options.events)
+    }
+
     this.initBoard()
+    this.delegateEvents()
     this.initNodes()
     this.layoutNodes()
     this.drawCurves()
@@ -56,6 +61,7 @@ class Workflow extends Watch {
       this.$element = elem
       this.$board = elem.getElementsByClassName('workflower-board')[0]
       this.$paths = elem.getElementsByClassName('workflower-paths')[0]
+
     }
   }
 
@@ -68,6 +74,35 @@ class Workflow extends Watch {
 
       this.nodes[data.id] = node
       node.renderTo(this.$board)
+    })
+  }
+
+  /**
+   * 点击事件
+   */
+  delegateEvents() {
+    this.$element.addEventListener('click', (event) => {
+      let target = event.target
+
+      while (target) {
+        if (target.classList.contains('workflower-node')) {
+          let nodeId = target.getAttribute('data-id')
+          let node = this.nodes[nodeId]
+
+          /**
+           * @emits {click} 节点点击事件，传入事件函数的参数：event, clickedComponentType == 'node', componentData = nodeData
+           */
+          this.emit('onNodeClick', event, node)
+
+          /**
+           * @emits {click} 全局点击事件，传入事件函数的参数：event, clickedComponentType == 'node', componentData = nodeData
+           */
+          this.emit('click', event, 'node', node)
+          break
+        } else {
+          target = target.parentNode
+        }
+      }
     })
   }
 

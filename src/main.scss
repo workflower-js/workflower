@@ -52,8 +52,11 @@
 		transition: 0.3s;
     overflow: hidden;
 
-		&:hover {
+		&:hover,
+		&:active,
+		&:focus {
 			//box-shadow: 3px 3px 5px #222836;
+      background-color: rgba(0,0,0,0.05);
 		}
 
 		> h3 {
@@ -181,6 +184,10 @@
     }
 	}
 
+  .type-0 .workflower-point,
+  [data-id^="startevent"] .workflower-point {
+    background-color: green;
+  }
 	.workflower-point {
 		background-color: #ccc;
 		width: 24px;

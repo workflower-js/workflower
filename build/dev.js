@@ -2,7 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const merge = require('webpack-merge')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const { SRC_PATH } = require('./utils')
+const {SRC_PATH, TEST_PATH} = require('./utils')
 const base = require('./base')
 
 const dev = {
@@ -24,7 +24,7 @@ const dev = {
     rules: [
       {
         test: /\.css$/,
-        loaders: [ 'style-loader', 'css-loader', 'autoprefixer?browsers=last 40 versions'],
+        loaders: ['style-loader', 'css-loader', 'autoprefixer?browsers=last 40 versions'],
       },
     ]
   },

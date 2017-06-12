@@ -43,7 +43,8 @@
     "webpack-merge": "^4.1.0"
   },
   "dependencies": {
-    "respondent-emitter": "^1.0.3"
+    "respondent-emitter": "^1.0.3",
+    "zingtouch": "^1.0.5"
   },
   "engines": {
     "node": ">= 4.0.0",

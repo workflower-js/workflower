@@ -7,7 +7,15 @@ const init = async function () {
 
   let workflower = new Workflower({
     nodes: result.data,
-    element: document.querySelector('#app')
+    element: document.querySelector('#app'),
+    events: {
+      click: function (event, type, node) {
+        console.log(node)
+      },
+      onNodeClick: function (event, node) {
+        console.log(node)
+      }
+    }
   })
 
   window.wf = workflower

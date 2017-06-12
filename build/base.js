@@ -1,5 +1,5 @@
 const path = require('path')
-const {SRC_PATH, DIST_PATH, TEST_PATH} = require('./utils')
+const {SRC_PATH, DIST_PATH, MODULE_PATH} = require('./utils')
 
 module.exports = {
   entry: {
@@ -13,7 +13,7 @@ module.exports = {
     publicPath: '/'
   },
   resolve: {
-    extensions: ['.js', '.json'],
+    extensions: ['.js', '.json', '.css'],
     alias: {
       '@': SRC_PATH,
     }
@@ -25,6 +25,11 @@ module.exports = {
         use: ['babel-loader'],
         include: [ SRC_PATH ]
       },
+      // {
+      //   test: /\.css$/,
+      //   use: ['style-loader', 'css-loader', 'autoprefixer-loader?browsers=last 40 versions'],
+      //   include: [SRC_PATH, MODULE_PATH]
+      // },
       {
         test: /\.s[ac]ss$/,
         use: ['style-loader', 'css-loader', 'autoprefixer-loader?browsers=last 40 versions', 'sass-loader'],
