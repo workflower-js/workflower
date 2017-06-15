@@ -61,7 +61,6 @@ class Workflow extends Watch {
       this.$element = elem
       this.$board = elem.getElementsByClassName('workflower-board')[0]
       this.$paths = elem.getElementsByClassName('workflower-paths')[0]
-
     }
   }
 
@@ -81,6 +80,11 @@ class Workflow extends Watch {
    * 点击事件
    */
   delegateEvents() {
+
+    this.on('resize', ()=>{
+      this.updateCanvasSize()
+    })
+
     this.$element.addEventListener('click', (event) => {
       let target = event.target
 
@@ -113,6 +117,8 @@ class Workflow extends Watch {
       node.on('layoutChange', (prop, old, val)=>{
         console.log(prop, old,  val)
         this.updateCureveOfNode(node)
+
+        this.emit('resize')
       })
     })
   }
@@ -167,6 +173,8 @@ class Workflow extends Watch {
         top += (padding + parseInt(node.height))
       })
     }
+
+    this.emit('resize')
 
     return {
       top: startY,
@@ -299,6 +307,26 @@ class Workflow extends Watch {
     })
 
     return result
+  }
+
+  /**
+   * 更新画板尺寸大小
+   */
+  updateCanvasSize() {
+    let x = 0
+    let y = 0
+
+    Object.keys(this.nodes).forEach(id => {
+      let node = this.nodes[id]
+      let point = node.getPoint()
+
+      x = Math.max(x, point.right)
+      y = Math.max(y, point.bottom)
+    })
+
+    this.$board.style.width = x + 'px'
+    this.$board.style.height = y + 'px'
+    console.log(x,  y)
   }
 
   /**

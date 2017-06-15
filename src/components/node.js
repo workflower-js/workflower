@@ -53,6 +53,8 @@ export default class Node extends Watch {
     offset.height = height
     offset.left = this.$point.offsetLeft + parseInt(this.left)
     offset.top = this.$point.offsetTop + parseInt(this.top) + height
+    offset.right = offset.left + offset.width
+    offset.bottom = offset.top + offset.height
 
     return offset
   }
