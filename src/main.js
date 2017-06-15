@@ -89,7 +89,7 @@ class Workflow extends Watch {
       let target = event.target
 
       while (target) {
-        if (target.classList.contains('workflower-node')) {
+        if (target.classList && target.classList.contains('workflower-node')) {
           let nodeId = target.getAttribute('data-id')
           let node = this.nodes[nodeId]
 
@@ -115,7 +115,7 @@ class Workflow extends Watch {
       let node = this.nodes[id]
 
       node.on('layoutChange', (prop, old, val)=>{
-        console.log(prop, old,  val)
+
         this.updateCureveOfNode(node)
 
         this.emit('resize')
@@ -326,7 +326,6 @@ class Workflow extends Watch {
 
     this.$board.style.width = x + 'px'
     this.$board.style.height = y + 'px'
-    console.log(x,  y)
   }
 
   /**
