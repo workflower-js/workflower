@@ -106,8 +106,7 @@
 			clear: both;
 		}
 
-    &.type-3,
-    &.type-4 {
+    &.type-3 {
       .workflower-label {
         position: relative;
         left: 200%;
@@ -121,6 +120,7 @@
       }
     }
 
+    &.type-4,
     &.type-2 {
       h4:empty:before {
         content: '结束';

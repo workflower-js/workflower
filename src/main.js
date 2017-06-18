@@ -71,8 +71,10 @@ class Workflow extends Watch {
     this.options.nodes.forEach(data => {
       let node = this.createNode(data)
 
-      this.nodes[data.id] = node
-      node.renderTo(this.$board)
+      if (node) {
+        this.nodes[data.id] = node
+        node.renderTo(this.$board)
+      }
     })
   }
 
@@ -124,7 +126,13 @@ class Workflow extends Watch {
   }
 
   createNode(data) {
-    return this.nodes[data.id] || new Node(data)
+    let node
+
+    if (parseInt(data.elementType) !== 2) {
+      node = this.nodes[data.id] || new Node(data)
+    }
+
+    return node
   }
 
   /**
