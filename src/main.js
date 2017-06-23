@@ -73,6 +73,7 @@ class Workflow extends Watch {
 
       if (node) {
         this.nodes[data.id] = node
+
         node.renderTo(this.$board)
       }
     })
@@ -175,7 +176,7 @@ class Workflow extends Watch {
           node.top = top
         }
 
-        node.left = left
+        node.left = Math.max(node.left, left)
 
         topCount = topOfNextLevel
         top += (padding + parseInt(node.height))

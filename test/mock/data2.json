@@ -1,0 +1,209 @@
+[
+  {
+    "taskUserList": [],
+    "id": "startevent1",
+    "incoming": [],
+    "processInstanceId": "",
+    "businessKey": "",
+    "outgoing": [
+      {
+        "id": "flow1",
+        "targetRef": "rmAudit",
+        "sourceRef": "startevent1"
+      },
+      {
+        "id": "flow2",
+        "targetRef": "pmAudit",
+        "sourceRef": "startevent1"
+      }
+    ],
+    "elementType": "0",
+    "procDefId": ""
+  },
+  {
+    "taskUserList": [
+      {
+        "taskId": "87518",
+        "formKey": "",
+        "businessKey": "",
+        "assignee": "165",
+        "taskKey": "rmAudit",
+        "assigneeName": "恐怖平凡",
+        "endTime": null,
+        "taskName": "大区经理",
+        "variables": null,
+        "startTime": {
+          "time": 1498199655639,
+          "minutes": 34,
+          "seconds": 15,
+          "hours": 14,
+          "month": 5,
+          "year": 117,
+          "timezoneOffset": -480,
+          "day": 5,
+          "date": 23
+        },
+        "activitiId": "",
+        "businessTitle": "",
+        "taskStatus": "1",
+        "processInstanceId": "87505",
+        "companyId": "",
+        "comment": ""
+      }
+    ],
+    "id": "rmAudit",
+    "incoming": [
+      {
+        "id": "flow1",
+        "targetRef": "rmAudit",
+        "sourceRef": "startevent1"
+      }
+    ],
+    "processInstanceId": "",
+    "businessKey": "",
+    "outgoing": [
+      {
+        "id": "flow3",
+        "targetRef": "saleAudit",
+        "sourceRef": "rmAudit"
+      }
+    ],
+    "elementType": "1",
+    "procDefId": ""
+  },
+  {
+    "taskUserList": [
+      {
+        "taskId": "87527",
+        "formKey": "",
+        "businessKey": "",
+        "assignee": "165",
+        "taskKey": "pmAudit",
+        "assigneeName": "恐怖平凡",
+        "endTime": null,
+        "taskName": "产品经理",
+        "variables": null,
+        "startTime": {
+          "time": 1498199656274,
+          "minutes": 34,
+          "seconds": 16,
+          "hours": 14,
+          "month": 5,
+          "year": 117,
+          "timezoneOffset": -480,
+          "day": 5,
+          "date": 23
+        },
+        "activitiId": "",
+        "businessTitle": "",
+        "taskStatus": "1",
+        "processInstanceId": "87505",
+        "companyId": "",
+        "comment": ""
+      }
+    ],
+    "id": "pmAudit",
+    "incoming": [
+      {
+        "id": "flow2",
+        "targetRef": "pmAudit",
+        "sourceRef": "startevent1"
+      }
+    ],
+    "processInstanceId": "",
+    "businessKey": "",
+    "outgoing": [
+      {
+        "id": "flow5",
+        "targetRef": "parallelgateway1",
+        "sourceRef": "pmAudit"
+      }
+    ],
+    "elementType": "1",
+    "procDefId": ""
+  },
+  {
+    "taskUserList": [
+      {
+        "taskId": "",
+        "formKey": "",
+        "businessKey": "",
+        "assignee": "",
+        "taskKey": "saleAudit",
+        "assigneeName": "",
+        "endTime": null,
+        "taskName": "销售总监",
+        "variables": null,
+        "startTime": null,
+        "activitiId": "",
+        "businessTitle": "",
+        "taskStatus": "2",
+        "processInstanceId": "",
+        "companyId": "",
+        "comment": ""
+      }
+    ],
+    "id": "saleAudit",
+    "incoming": [
+      {
+        "id": "flow3",
+        "targetRef": "saleAudit",
+        "sourceRef": "rmAudit"
+      }
+    ],
+    "processInstanceId": "",
+    "businessKey": "",
+    "outgoing": [
+      {
+        "id": "flow4",
+        "targetRef": "parallelgateway1",
+        "sourceRef": "saleAudit"
+      }
+    ],
+    "elementType": "1",
+    "procDefId": ""
+  },
+  {
+    "taskUserList": [],
+    "id": "parallelgateway1",
+    "incoming": [
+      {
+        "id": "flow4",
+        "targetRef": "parallelgateway1",
+        "sourceRef": "saleAudit"
+      },
+      {
+        "id": "flow5",
+        "targetRef": "parallelgateway1",
+        "sourceRef": "pmAudit"
+      }
+    ],
+    "processInstanceId": "",
+    "businessKey": "",
+    "outgoing": [
+      {
+        "id": "flow6",
+        "targetRef": "endevent1",
+        "sourceRef": "parallelgateway1"
+      }
+    ],
+    "elementType": "4",
+    "procDefId": ""
+  },
+  {
+    "taskUserList": [],
+    "id": "endevent1",
+    "incoming": [
+      {
+        "id": "flow6",
+        "targetRef": "endevent1",
+        "sourceRef": "parallelgateway1"
+      }
+    ],
+    "processInstanceId": "",
+    "businessKey": "",
+    "outgoing": [],
+    "elementType": "2",
+    "procDefId": ""
+  }
+]
