@@ -1,209 +1,231 @@
-[
-  {
-    "taskUserList": [],
-    "id": "startevent1",
-    "incoming": [],
-    "processInstanceId": "",
+[{
+  "taskUserList": [],
+  "id": "startevent1",
+  "incoming": [],
+  "processInstanceId": "",
+  "businessKey": "",
+  "outgoing": [{
+    "id": "flow1",
+    "targetRef": "rmAudit",
+    "sourceRef": "startevent1"
+  }, {
+    "id": "flow2",
+    "targetRef": "pmAudit",
+    "sourceRef": "startevent1"
+  }],
+  "elementType": "0",
+  "procDefId": ""
+}, {
+  "taskUserList": [{
+    "taskId": "92549",
+    "formKey": "",
     "businessKey": "",
-    "outgoing": [
-      {
-        "id": "flow1",
-        "targetRef": "rmAudit",
-        "sourceRef": "startevent1"
-      },
-      {
-        "id": "flow2",
-        "targetRef": "pmAudit",
-        "sourceRef": "startevent1"
-      }
-    ],
-    "elementType": "0",
-    "procDefId": ""
-  },
-  {
-    "taskUserList": [
-      {
-        "taskId": "87518",
-        "formKey": "",
-        "businessKey": "",
-        "assignee": "165",
-        "taskKey": "rmAudit",
-        "assigneeName": "恐怖平凡",
-        "endTime": null,
-        "taskName": "大区经理",
-        "variables": null,
-        "startTime": {
-          "time": 1498199655639,
-          "minutes": 34,
-          "seconds": 15,
-          "hours": 14,
-          "month": 5,
-          "year": 117,
-          "timezoneOffset": -480,
-          "day": 5,
-          "date": 23
-        },
-        "activitiId": "",
-        "businessTitle": "",
-        "taskStatus": "1",
-        "processInstanceId": "87505",
-        "companyId": "",
-        "comment": ""
-      }
-    ],
-    "id": "rmAudit",
-    "incoming": [
-      {
-        "id": "flow1",
-        "targetRef": "rmAudit",
-        "sourceRef": "startevent1"
-      }
-    ],
-    "processInstanceId": "",
+    "assignee": "165",
+    "taskKey": "rmAudit",
+    "assigneeName": "恐怖平凡",
+    "endTime": {
+      "time": 1498619394012,
+      "minutes": 9,
+      "seconds": 54,
+      "hours": 11,
+      "month": 5,
+      "year": 117,
+      "timezoneOffset": -480,
+      "day": 3,
+      "date": 28
+    },
+    "taskName": "大区经理",
+    "variables": null,
+    "startTime": {
+      "time": 1498619067544,
+      "minutes": 4,
+      "seconds": 27,
+      "hours": 11,
+      "month": 5,
+      "year": 117,
+      "timezoneOffset": -480,
+      "day": 3,
+      "date": 28
+    },
+    "activitiId": "",
+    "businessTitle": "",
+    "taskStatus": "0",
+    "processInstanceId": "92536",
+    "companyId": "",
+    "comment": "通过"
+  }],
+  "id": "rmAudit",
+  "incoming": [{
+    "id": "flow1",
+    "targetRef": "rmAudit",
+    "sourceRef": "startevent1"
+  }],
+  "processInstanceId": "",
+  "businessKey": "",
+  "outgoing": [{
+    "id": "flow3",
+    "targetRef": "saleAudit",
+    "sourceRef": "rmAudit"
+  }],
+  "elementType": "1",
+  "procDefId": ""
+}, {
+  "taskUserList": [{
+    "taskId": "92559",
+    "formKey": "",
     "businessKey": "",
-    "outgoing": [
-      {
-        "id": "flow3",
-        "targetRef": "saleAudit",
-        "sourceRef": "rmAudit"
-      }
-    ],
-    "elementType": "1",
-    "procDefId": ""
-  },
-  {
-    "taskUserList": [
-      {
-        "taskId": "87527",
-        "formKey": "",
-        "businessKey": "",
-        "assignee": "165",
-        "taskKey": "pmAudit",
-        "assigneeName": "恐怖平凡",
-        "endTime": null,
-        "taskName": "产品经理",
-        "variables": null,
-        "startTime": {
-          "time": 1498199656274,
-          "minutes": 34,
-          "seconds": 16,
-          "hours": 14,
-          "month": 5,
-          "year": 117,
-          "timezoneOffset": -480,
-          "day": 5,
-          "date": 23
-        },
-        "activitiId": "",
-        "businessTitle": "",
-        "taskStatus": "1",
-        "processInstanceId": "87505",
-        "companyId": "",
-        "comment": ""
-      }
-    ],
-    "id": "pmAudit",
-    "incoming": [
-      {
-        "id": "flow2",
-        "targetRef": "pmAudit",
-        "sourceRef": "startevent1"
-      }
-    ],
-    "processInstanceId": "",
+    "assignee": "165",
+    "taskKey": "pmAudit",
+    "assigneeName": "恐怖平凡",
+    "endTime": {
+      "time": 1498619394034,
+      "minutes": 9,
+      "seconds": 54,
+      "hours": 11,
+      "month": 5,
+      "year": 117,
+      "timezoneOffset": -480,
+      "day": 3,
+      "date": 28
+    },
+    "taskName": "产品经理",
+    "variables": null,
+    "startTime": {
+      "time": 1498619067590,
+      "minutes": 4,
+      "seconds": 27,
+      "hours": 11,
+      "month": 5,
+      "year": 117,
+      "timezoneOffset": -480,
+      "day": 3,
+      "date": 28
+    },
+    "activitiId": "",
+    "businessTitle": "",
+    "taskStatus": "0",
+    "processInstanceId": "92536",
+    "companyId": "",
+    "comment": "通过"
+  }],
+  "id": "pmAudit",
+  "incoming": [{
+    "id": "flow2",
+    "targetRef": "pmAudit",
+    "sourceRef": "startevent1"
+  }],
+  "processInstanceId": "",
+  "businessKey": "",
+  "outgoing": [{
+    "id": "flow5",
+    "targetRef": "parallelgateway1",
+    "sourceRef": "pmAudit"
+  }],
+  "elementType": "1",
+  "procDefId": ""
+}, {
+  "taskUserList": [{
+    "taskId": "92562",
+    "formKey": "",
     "businessKey": "",
-    "outgoing": [
-      {
-        "id": "flow5",
-        "targetRef": "parallelgateway1",
-        "sourceRef": "pmAudit"
-      }
-    ],
-    "elementType": "1",
-    "procDefId": ""
-  },
-  {
-    "taskUserList": [
-      {
-        "taskId": "",
-        "formKey": "",
-        "businessKey": "",
-        "assignee": "",
-        "taskKey": "saleAudit",
-        "assigneeName": "",
-        "endTime": null,
-        "taskName": "销售总监",
-        "variables": null,
-        "startTime": null,
-        "activitiId": "",
-        "businessTitle": "",
-        "taskStatus": "2",
-        "processInstanceId": "",
-        "companyId": "",
-        "comment": ""
-      }
-    ],
-    "id": "saleAudit",
-    "incoming": [
-      {
-        "id": "flow3",
-        "targetRef": "saleAudit",
-        "sourceRef": "rmAudit"
-      }
-    ],
-    "processInstanceId": "",
+    "assignee": "165",
+    "taskKey": "saleAudit",
+    "assigneeName": "恐怖平凡",
+    "endTime": {
+      "time": 1498619491269,
+      "minutes": 11,
+      "seconds": 31,
+      "hours": 11,
+      "month": 5,
+      "year": 117,
+      "timezoneOffset": -480,
+      "day": 3,
+      "date": 28
+    },
+    "taskName": "销售总监",
+    "variables": null,
+    "startTime": {
+      "time": 1498619394015,
+      "minutes": 9,
+      "seconds": 54,
+      "hours": 11,
+      "month": 5,
+      "year": 117,
+      "timezoneOffset": -480,
+      "day": 3,
+      "date": 28
+    },
+    "activitiId": "",
+    "businessTitle": "",
+    "taskStatus": "0",
+    "processInstanceId": "92536",
+    "companyId": "",
+    "comment": ""
+  }],
+  "id": "saleAudit",
+  "incoming": [{
+    "id": "flow3",
+    "targetRef": "saleAudit",
+    "sourceRef": "rmAudit"
+  }],
+  "processInstanceId": "",
+  "businessKey": "",
+  "outgoing": [{
+    "id": "flow4",
+    "targetRef": "parallelgateway1",
+    "sourceRef": "saleAudit"
+  }],
+  "elementType": "1",
+  "procDefId": ""
+}, {
+  "taskUserList": [],
+  "id": "parallelgateway1",
+  "incoming": [{
+    "id": "flow4",
+    "targetRef": "parallelgateway1",
+    "sourceRef": "saleAudit"
+  }, {
+    "id": "flow5",
+    "targetRef": "parallelgateway1",
+    "sourceRef": "pmAudit"
+  }],
+  "processInstanceId": "",
+  "businessKey": "",
+  "outgoing": [{
+    "id": "flow6",
+    "targetRef": "endevent1",
+    "sourceRef": "parallelgateway1"
+  }],
+  "elementType": "4",
+  "procDefId": ""
+}, {
+  "taskUserList": [{
+    "taskId": "",
+    "formKey": "",
     "businessKey": "",
-    "outgoing": [
-      {
-        "id": "flow4",
-        "targetRef": "parallelgateway1",
-        "sourceRef": "saleAudit"
-      }
-    ],
-    "elementType": "1",
-    "procDefId": ""
-  },
-  {
-    "taskUserList": [],
-    "id": "parallelgateway1",
-    "incoming": [
-      {
-        "id": "flow4",
-        "targetRef": "parallelgateway1",
-        "sourceRef": "saleAudit"
-      },
-      {
-        "id": "flow5",
-        "targetRef": "parallelgateway1",
-        "sourceRef": "pmAudit"
-      }
-    ],
+    "assignee": "",
+    "taskKey": "",
+    "assigneeName": "",
+    "endTime": null,
+    "taskName": "",
+    "variables": null,
+    "startTime": null,
+    "activitiId": "",
+    "businessTitle": "",
+    "taskStatus": "0",
     "processInstanceId": "",
-    "businessKey": "",
-    "outgoing": [
-      {
-        "id": "flow6",
-        "targetRef": "endevent1",
-        "sourceRef": "parallelgateway1"
-      }
-    ],
-    "elementType": "4",
-    "procDefId": ""
-  },
-  {
-    "taskUserList": [],
-    "id": "endevent1",
-    "incoming": [
-      {
-        "id": "flow6",
-        "targetRef": "endevent1",
-        "sourceRef": "parallelgateway1"
-      }
-    ],
-    "processInstanceId": "",
-    "businessKey": "",
-    "outgoing": [],
-    "elementType": "2",
-    "procDefId": ""
-  }
-]
+    "companyId": "",
+    "comment": ""
+  }],
+  "id": "endevent1",
+  "incoming": [{
+    "id": "flow6",
+    "targetRef": "endevent1",
+    "sourceRef": "parallelgateway1"
+  }],
+  "processInstanceId": "",
+  "businessKey": "",
+  "outgoing": [],
+  "elementType": "2",
+  "procDefId": ""
+}]

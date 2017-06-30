@@ -71,10 +71,27 @@ class Workflow extends Watch {
     this.options.nodes.forEach(data => {
       let node = this.createNode(data)
 
+      this.cache.data = this.cache.data || {}
+      this.cache.data[data.id] = data
+
       if (node) {
         this.nodes[data.id] = node
-
         node.renderTo(this.$board)
+      }
+    })
+
+
+    this.options.nodes.forEach(data => {
+      if (parseInt(data.elementType) === 4) {
+        let targetNodes = this.getTargetData(data.id)
+
+        data.taskUserList = targetNodes[0] && targetNodes[0].taskUserList
+      }
+
+      let node = this.resolveNode(data.id)
+
+      if (node) {
+        node.updateStatus(data.taskUserList.length > 0 ? data.taskUserList[0].taskStatus : '')
       }
     })
   }
@@ -143,6 +160,15 @@ class Workflow extends Watch {
    */
   resolveNode(id) {
     return typeof id === 'string' ? this.nodes[id] : id
+  }
+
+  /**
+   * 把 数据 id 转成 Data 实例
+   * @param {String|Node} id
+   * @returns {Node}
+   */
+  resolveData(id) {
+    return typeof id === 'string' ? this.cache.data[id] : id
   }
 
   /**
@@ -298,6 +324,27 @@ class Workflow extends Watch {
   }
 
   /**
+   * 获取来源数据
+   * @param {String} id
+   * @returns {Array}
+   */
+  getTargetData(id) {
+    let data = this.resolveData(id)
+    let list = data.incoming || []
+    let result = []
+
+    list.forEach(source => {
+      let data = this.cache.data[source.sourceRef]
+
+      if (data) {
+        result.push(data)
+      }
+    })
+
+    return result
+  }
+
+  /**
    * 获取目标节点
    * @param {String|Node} id
    * @returns {Array<Node>}
@@ -312,6 +359,27 @@ class Workflow extends Watch {
 
       if (node) {
         result.push(node)
+      }
+    })
+
+    return result
+  }
+
+  /**
+   * 获取目标数据
+   * @param {String} id
+   * @returns {Array}
+   */
+  getTargetData(id) {
+    let data = this.resolveData(id)
+    let list = data.outgoing || []
+    let result = []
+
+    list.forEach(target => {
+      let data = this.cache.data[target.targetRef]
+
+      if (data) {
+        result.push(data)
       }
     })
 

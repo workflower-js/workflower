@@ -94,6 +94,7 @@ export default class Node extends Watch {
    */
   renderTo ($container) {
     if ($container && typeof $container.appendChild === 'function') {
+      // this.$element = this.format()
       $container.appendChild(this.$element)
 
       this.width = this.$element.offsetWidth
@@ -102,12 +103,20 @@ export default class Node extends Watch {
   }
 
   /**
+   * 更新节点状态
+   */
+  updateStatus (status) {
+    let point = this.$element.getElementsByClassName('workflower-point')[0]
+
+    point.className = 'workflower-point status-' + status
+  }
+
+  /**
    *
    */
   format () {
     let taskList = this.data.taskUserList
     let taskName = (taskList && taskList.length > 0) ? taskList[0].taskName : ''
-
     let taskStatus = (taskList && taskList.length > 0) ? taskList[0].taskStatus : ''
 
     let template = `
