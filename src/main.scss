@@ -191,6 +191,20 @@
   .type-0 .workflower-point,
   [data-id^="startevent"] .workflower-point {
     background-color: green;
+    &:after {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 8px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      margin: -8px 0 0 -4px;
+      transform: rotate(45deg);
+      border: 2px solid rgba(0,0,0,0);
+      border-right-color: #fff;
+      border-bottom-color: #fff;
+    }
   }
 	.workflower-point {
 		background-color: #ccc;
@@ -198,6 +212,7 @@
 		height: 24px;
 		border-radius: 50%;
     margin: auto;
+    position: relative;
 
 		&.selected {
 			background-color: #ffe63f;
@@ -205,6 +220,21 @@
 
     &.status-0 {
       background-color: green;
+
+      &:after {
+        content: '';
+        display: block;
+        width: 4px;
+        height: 8px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        margin: -8px 0 0 -4px;
+        transform: rotate(45deg);
+        border: 2px solid rgba(0,0,0,0);
+        border-right-color: #fff;
+        border-bottom-color: #fff;
+      }
     }
     &.status-1 {
       background-color: rgb(47, 134, 213);
@@ -214,6 +244,21 @@
     }
     &.status-3 {
       background-color: red;
+
+      &:after {
+        content: 'X';
+        display: flex;
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        text-align: center;
+        justify-content: center;
+        align-content: center;
+        color: #fff;
+
+      }
     }
 	}
 }

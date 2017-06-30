@@ -97,7 +97,7 @@
     },
     "activitiId": "",
     "businessTitle": "",
-    "taskStatus": "1",
+    "taskStatus": "3",
     "processInstanceId": "325085",
     "companyId": "",
     "comment": ""
@@ -113,7 +113,7 @@
     "startTime": null,
     "activitiId": "",
     "businessTitle": "",
-    "taskStatus": "2",
+    "taskStatus": "3",
     "processInstanceId": "",
     "companyId": "",
     "comment": ""
