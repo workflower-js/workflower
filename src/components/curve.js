@@ -12,7 +12,7 @@ export default class Curve extends Watch {
 
     let watcher = () => {
       this.update()
-      console.log('curve update.')
+      
     }
 
     this.draw()
