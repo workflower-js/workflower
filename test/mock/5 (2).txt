@@ -1,0 +1,51 @@
+{
+  "endEvent": {
+    "id": "string",
+    "name": "string"
+  },
+  "exclusiveGatewayList": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ],
+  "flowList": [
+    {
+      "conditionExpression": "string",
+      "id": "string",
+      "name": "string",
+      "sourceRef": "string",
+      "targetRef": "string"
+    }
+  ],
+  
+  "parGateWayList": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ],
+  "processId": "string",
+  "processName": "string",
+  "startEvent": {
+    "id": "string",
+    "initiator": "string",
+    "name": "string"
+  },
+  "usertaskList": [
+    {
+      "assignee": [
+        "string"
+      ],
+      "charInfo": {
+        "condition": "string",
+        "elementVariable": "string",
+        "inputDataItem": "string",
+        "userTaskId": "string"
+      },
+      "documentation": "string",
+      "id": "string",
+      "name": "string"
+    }
+  ]
+}

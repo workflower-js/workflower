@@ -14,7 +14,8 @@
     "sourceRef": "startevent1"
   }],
   "elementType": "0",
-  "procDefId": ""
+  "procDefId": "",
+  "approver":""
 }, {
   "taskUserList": [{
     "taskId": "325105",
@@ -73,7 +74,8 @@
     "sourceRef": "pmAudit"
   }],
   "elementType": "1",
-  "procDefId": ""
+  "procDefId": "",
+  "approver":""
 }, {
   "taskUserList": [{
     "taskId": "325108",
@@ -132,7 +134,8 @@
     "sourceRef": "rmAudit"
   }],
   "elementType": "1",
-  "procDefId": ""
+  "procDefId": "",
+  "approver":""
 }, {
   "taskUserList": [{
     "taskId": "",
@@ -165,7 +168,8 @@
     "sourceRef": "saleAudit"
   }],
   "elementType": "1",
-  "procDefId": ""
+  "procDefId": "",
+  "approver":""
 }, {
   "taskUserList": [{
     "taskId": "",
@@ -198,9 +202,27 @@
     "sourceRef": "controllAudit"
   }],
   "elementType": "1",
-  "procDefId": ""
+  "procDefId": "",
+  "approver":""
 }, {
-  "taskUserList": [],
+  "taskUserList": [{
+    "taskId": "",
+    "formKey": "",
+    "businessKey": "",
+    "assignee": "",
+    "taskKey": "parallelgateway1",
+    "assigneeName": "",
+    "endTime": null,
+    "taskName": "parallelgateway1",
+    "variables": null,
+    "startTime": null,
+    "activitiId": "",
+    "businessTitle": "",
+    "taskStatus": "2",
+    "processInstanceId": "",
+    "companyId": "",
+    "comment": ""
+  }],
   "id": "parallelgateway1",
   "incoming": [{
     "id": "flow5",
@@ -219,9 +241,27 @@
     "sourceRef": "parallelgateway1"
   }],
   "elementType": "4",
-  "procDefId": ""
+  "procDefId": "",
+  "approver":""
 }, {
-  "taskUserList": [],
+  "taskUserList": [{
+    "taskId": "",
+    "formKey": "",
+    "businessKey": "",
+    "assignee": "",
+    "taskKey": "结束",
+    "assigneeName": "",
+    "endTime": null,
+    "taskName": "",
+    "variables": null,
+    "startTime": null,
+    "activitiId": "",
+    "businessTitle": "",
+    "taskStatus": "0",
+    "processInstanceId": "",
+    "companyId": "",
+    "comment": ""
+  }],
   "id": "endevent1",
   "incoming": [{
     "id": "flow7",
@@ -232,5 +272,6 @@
   "businessKey": "",
   "outgoing": [],
   "elementType": "2",
-  "procDefId": ""
+  "procDefId": "",
+  "approver":""
 }]
