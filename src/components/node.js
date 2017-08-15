@@ -115,10 +115,41 @@ export default class Node extends Watch {
    *
    */
   format () {
-    let taskList = this.data.taskUserList
-    let taskName = (taskList && taskList.length > 0) ? taskList[0].taskName : ''
-    let taskStatus = (taskList && taskList.length > 0) ? taskList[0].taskStatus : ''
+  	let taskName
+  	let taskStatus
+  	if(this.data.taskUserList != null){
+	   	if(this.data.taskUserList.length > 0){
+		     let taskList = this.data.taskUserList
+		    
+		     if(taskList && taskList.length > 0){
+		     	
+		     	if(taskList[0].taskName == ""){
+		     		
+		     		taskName = this.data.name
+		     	}else{
+			     	taskName = ""
+			     	taskStatus = ""		     		
+		     	}
+		     }else{
+		     	taskName = ""
+		     	taskStatus = ""
+		     }
+			
+	  	}else if(this.data.taskUserList.length == 0){
+	  		let dataArr = []
+	  		dataArr[0] = this.data.name
+	
+	   		taskName = dataArr[0]
+	  		taskStatus = dataArr[1]
+	  		if(this.data.id == "startevent1"){
+	  			taskName = "开始"
+	  			taskStatus = "1"
+	  		}
+				
+	  	} 		
+  	}
 
+	
     let template = `
       <div class="workflower-node type-${this.data.elementType}" id="node-${this.data.id}" data-id="${this.data.id}">
       
@@ -129,7 +160,7 @@ export default class Node extends Watch {
           <h4>${taskName}</h4>
         </div>
         <div class="workflower-point status-${taskStatus}"></div> 
-      </div>`
+      </div>` 
 
     let wrapper = document.createElement('div')
         wrapper.innerHTML = template
