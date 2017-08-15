@@ -110,6 +110,13 @@
 			clear: both;
 		}
 
+    h4:before {
+      content: '';
+      display: inline-block;
+      line-height: 1.5rem;
+      height: 1.5rem;
+    }
+
     &.type-3 {
       .workflower-label {
         position: relative;
@@ -124,7 +131,13 @@
       }
     }
 
-    &.type-4,
+    &.type-4 {
+      h4:empty:before {
+        content: '';
+        opacity: .5;
+      }
+    }
+
     &.type-2 {
       h4:empty:before {
         content: '结束';
