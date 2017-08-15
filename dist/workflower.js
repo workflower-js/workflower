@@ -576,7 +576,7 @@ if(false) {
 
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -608,880 +608,886 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var Workflow = function (_Watch) {
-	_inherits(Workflow, _Watch);
+  _inherits(Workflow, _Watch);
 
-	/**
-  * @constructor
-  * @param options
-  */
-	function Workflow() {
-		var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  /**
+   * @constructor
+   * @param options
+   */
+  function Workflow() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-		_classCallCheck(this, Workflow);
+    _classCallCheck(this, Workflow);
 
-		var _this = _possibleConstructorReturn(this, (Workflow.__proto__ || Object.getPrototypeOf(Workflow)).call(this));
+    var _this = _possibleConstructorReturn(this, (Workflow.__proto__ || Object.getPrototypeOf(Workflow)).call(this));
 
-		_this.options = _extends({
-			element: null,
-			editable: true,
-			gapLength: 40,
-			nodes: [],
-			padding: '10px',
-			getNodeAttributes: function getNodeAttributes(nodeData) {
-				return '';
-			}
+    _this.options = _extends({
+      element: null,
+      editable: true,
+      gapLength: 40,
+      nodes: [],
+      padding: '10px',
+      getNodeAttributes: function getNodeAttributes(nodeData) {
+        return '';
+      }
 
-		}, options);
+    }, options);
 
-		_this.cache = {};
-		_this.nodes = {};
-		_this.lines = {};
+    _this.cache = {};
+    _this.nodes = {};
+    _this.lines = {};
 
-		if (_this.options.events) {
-			_this.on(_this.options.events);
-		}
+    if (_this.options.events) {
+      _this.on(_this.options.events);
+    }
 
-		_this.initBoard();
-		_this.delegateEvents();
-		_this.initNodes();
-		_this.layoutNodes();
-		_this.drawCurves();
-		_this.watchNodeOffset();
-		return _this;
-	}
+    _this.initBoard();
+    _this.delegateEvents();
+    _this.initNodes();
+    _this.layoutNodes();
+    _this.drawCurves();
+    _this.watchNodeOffset();
+    return _this;
+  }
 
-	/**
-  * 初始化画板
-  */
-
-
-	_createClass(Workflow, [{
-		key: 'initBoard',
-		value: function initBoard() {
-			var elem = this.options.element;
-
-			if (elem) {
-				elem.classList.add('workflower');
-
-				elem.innerHTML = '\n        <div class="workflower">\n          <div class="workflower-board">\n            <svg class="workflower-paths"></svg>\n          </div>\n        </div>';
-
-				this.$element = elem;
-				this.$board = elem.getElementsByClassName('workflower-board')[0];
-				this.$paths = elem.getElementsByClassName('workflower-paths')[0];
-			}
-		}
-
-		/**
-   * 初始化节点
+  /**
+   * 初始化画板
    */
 
-	}, {
-		key: 'initNodes',
-		value: function initNodes() {
-			var _this2 = this;
-
-			var nodes = this.options.nodes;
-
-			nodes.forEach(function (data) {
-				var node = _this2.createNode(data);
-
-				_this2.cache.data = _this2.cache.data || {};
-				_this2.cache.data[data.id] = data;
-
-				if (node) {
-					_this2.nodes[data.id] = node;
-					node.renderTo(_this2.$board);
-				}
-			});
-
-			nodes.forEach(function (data) {
-
-				var node = _this2.resolveNode(data.id);
-
-				if (node) {
-					node.updateStatus(data.taskUserList.length > 0 ? data.taskUserList[0].taskStatus : '');
-				}
-			});
-		}
-
-		/**
-   * 点击事件
-   */
-
-	}, {
-		key: 'delegateEvents',
-		value: function delegateEvents() {
-			var _this3 = this;
-
-			this.on('resize', function () {
-				_this3.updateCanvasSize();
-			});
-
-			this.$element.addEventListener('click', function (event) {
-				var target = event.target;
-
-				while (target) {
-					if (target.classList && target.classList.contains('workflower-node')) {
-						var nodeId = target.getAttribute('data-id');
-						var node = _this3.nodes[nodeId];
-
-						/**
-       * @emits {click} 节点点击事件，传入事件函数的参数：event, clickedComponentType == 'node', componentData = nodeData
-       */
-						_this3.emit('onNodeClick', event, node);
-
-						/**
-       * @emits {click} 全局点击事件，传入事件函数的参数：event, clickedComponentType == 'node', componentData = nodeData
-       */
-						_this3.emit('click', event, 'node', node);
-						_this3.emit('contextmenu', event, node);
-						break;
-					} else {
-						target = target.parentNode;
-					}
-				}
-			});
-			//右键
-			this.$element.addEventListener('contextmenu', function (event) {
-				var target = event.target;
-
-				while (target) {
-					if (target.classList && target.classList.contains('workflower-node')) {
-						var nodeId = target.getAttribute('data-id');
-						var node = _this3.nodes[nodeId];
-						_this3.emit('rightClick', event, node, target);
-						break;
-					} else {
-						target = target.parentNode;
-					}
-				}
-			});
-		}
-	}, {
-		key: 'watchNodeOffset',
-		value: function watchNodeOffset() {
-			var _this4 = this;
-
-			Object.keys(this.nodes).forEach(function (id) {
-				var node = _this4.nodes[id];
-
-				node.on('layoutChange', function (prop, old, val) {
-
-					_this4.updateCureveOfNode(node);
-
-					_this4.emit('resize');
-				});
-			});
-		}
-	}, {
-		key: 'createNode',
-		value: function createNode(data) {
-			var node = void 0;
-
-			node = this.nodes[data.id] || new _node2.default(data);
-
-			return node;
-		}
-
-		/**
-   * 把 node id 转成 Node 实例
-   * @param {String|Node} id
-   * @returns {Node}
-   */
-
-	}, {
-		key: 'resolveNode',
-		value: function resolveNode(id) {
-			return typeof id === 'string' ? this.nodes[id] : id;
-		}
-
-		/**
-   * 把 数据 id 转成 Data 实例
-   * @param {String|Node} id
-   * @returns {Node}
-   */
-
-	}, {
-		key: 'resolveData',
-		value: function resolveData(id) {
-			return typeof id === 'string' ? this.cache.data[id] : id;
-		}
-
-		/**
-   * 节点排列
-   */
-
-	}, {
-		key: 'layoutNodes',
-		value: function layoutNodes(nodes) {
-			var _this5 = this;
-
-			var startY = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-			var startX = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-			var padding = parseInt(this.options.padding);
-			var topCount = startY;
-			var top = startY;
-			var left = startX + padding;
-			var bottom = startY + padding;
-			var leftOfNextLevel = void 0;
-			var topOfNextLevel = void 0;
-
-			nodes = nodes || this.getRootNodes();
-			if (nodes && nodes instanceof Array) {
-				var currentLevelTop = top;
-
-				nodes.forEach(function (node) {
-					var targets = _this5.getTargetNodes(node);
-
-					topOfNextLevel = top;
-					leftOfNextLevel = left + parseInt(node.width);
-
-					if (targets.length > 0) {
-						var childArea = _this5.layoutNodes(targets, top, leftOfNextLevel);
-						var sup_top = childArea.top + (childArea.bottom - childArea.top) / 2;
-
-						node.top = sup_top;
-					} else {
-						node.top = top;
-					}
-
-					node.left = Math.max(node.left, left);
-
-					topCount = topOfNextLevel;
-					top += padding + parseInt(node.height);
-				});
-			}
-
-			this.emit('resize');
-
-			return {
-				top: startY,
-				bottom: top,
-				left: startX,
-				right: left + leftOfNextLevel,
-				children: nodes.length
-				// childrenGap:
-			};
-		}
-
-		/**
-   * 更新节点的连接线
-   * @param {Node} node
-   */
-
-	}, {
-		key: 'updateCureveOfNode',
-		value: function updateCureveOfNode(node) {
-			var _this6 = this;
-
-			var sourceNodes = this.getSourceNodes(node);
-			var targetNodes = this.getTargetNodes(node);
-			var point = node.getPoint();
-
-			// 更新入口的连接线
-			sourceNodes.forEach(function (source) {
-				var curveId = source.id + '->' + node.id;
-				var curve = _this6.lines[curveId];
-
-				if (curve) {
-					curve.endX = point.left;
-					curve.endY = point.top;
-				}
-			});
-
-			// 更新出口的连接线
-			targetNodes.forEach(function (target) {
-				var curveId = node.id + '->' + target.id;
-				var curve = _this6.lines[curveId];
-
-				if (curve) {
-					curve.startX = point.left;
-					curve.startY = point.top;
-				}
-			});
-		}
-
-		/**
-   * 连线
-   */
-
-	}, {
-		key: 'drawCurves',
-		value: function drawCurves(nodes) {
-			var _this7 = this;
-
-			nodes = nodes || this.getRootNodes();
-
-			if (nodes && nodes instanceof Array) {
-				nodes.forEach(function (node) {
-					var sourceOffset = node.getPoint();
-					var targets = _this7.getTargetNodes(node);
-
-					sourceOffset.left += sourceOffset.width / 2;
-
-					targets.forEach(function (target) {
-						var targetOffset = target.getPoint();
-						targetOffset.left -= 4;
-						var curve = new _curve2.default(sourceOffset, targetOffset);
-						var path = curve.draw();
-						var curveId = node.id + '->' + target.id;
-
-						curve.id = curveId;
-						_this7.lines[curveId] = curve;
-						_this7.$paths.appendChild(path);
-					});
-
-					_this7.drawCurves(targets);
-				});
-			}
-		}
-
-		/**
-   * 获取根节点
-   */
-
-	}, {
-		key: 'getRootNodes',
-		value: function getRootNodes() {
-			var _this8 = this;
-
-			var cache = this.cache[Workflow.ROOTS];
-
-			if (cache) {
-				return cache;
-			} else {
-				var roots = [];
-
-				Object.keys(this.nodes).forEach(function (id) {
-					var node = _this8.nodes[id];
-
-					if (parseInt(node.data.elementType) === 0) {
-						roots.push(node);
-					}
-				});
-
-				return this.cache[Workflow.ROOTS] = roots;
-			}
-		}
-
-		/**
-   * 获取来源节点
-   * @param {String|Node} id
-   * @returns {Array<Node>}
-   */
-
-	}, {
-		key: 'getSourceNodes',
-		value: function getSourceNodes(id) {
-			var _this9 = this;
-
-			var node = this.resolveNode(id);
-			var list = node.data.incoming || [];
-			var result = [];
-
-			list.forEach(function (source) {
-				var node = _this9.nodes[source.sourceRef];
-
-				if (node) {
-					result.push(node);
-				}
-			});
-
-			return result;
-		}
-
-		/**
-   * 获取来源数据
-   * @param {String} id
-   * @returns {Array}
-   */
-
-	}, {
-		key: 'getSourceData',
-		value: function getSourceData(id) {
-			var _this10 = this;
-
-			var data = this.resolveData(id);
-			var list = data.incoming || [];
-			var result = [];
-
-			list.forEach(function (source) {
-				var data = _this10.cache.data[source.sourceRef];
-
-				if (data) {
-					result.push(data);
-				}
-			});
-
-			return result;
-		}
-
-		/**
-   * 获取目标节点
-   * @param {String|Node} id
-   * @returns {Array<Node>}
-   */
-
-	}, {
-		key: 'getTargetNodes',
-		value: function getTargetNodes(id) {
-			var _this11 = this;
-
-			var node = this.resolveNode(id);
-			var list = node.data.outgoing || [];
-			var result = [];
-
-			list.forEach(function (target) {
-				var node = _this11.nodes[target.targetRef];
-
-				if (node) {
-					result.push(node);
-				}
-			});
-
-			return result;
-		}
-
-		/**
-   * 获取目标数据
-   * @param {String} id
-   * @returns {Array}
-   */
-
-	}, {
-		key: 'getTargetData',
-		value: function getTargetData(id) {
-			var _this12 = this;
-
-			var data = this.resolveData(id);
-			var list = data.outgoing || [];
-			var result = [];
-
-			list.forEach(function (target) {
-				var data = _this12.cache.data[target.targetRef];
-
-				if (data) {
-					result.push(data);
-				}
-			});
-
-			return result;
-		}
-
-		/**
-   * 更新画板尺寸大小
-   */
-
-	}, {
-		key: 'updateCanvasSize',
-		value: function updateCanvasSize() {
-			var _this13 = this;
-
-			var x = 0;
-			var y = 0;
-
-			Object.keys(this.nodes).forEach(function (id) {
-				var node = _this13.nodes[id];
-				var point = node.getPoint();
-
-				x = Math.max(x, point.right);
-				y = Math.max(y, point.bottom);
-			});
-
-			this.$board.style.width = x + 'px';
-			this.$board.style.height = y + 'px';
-		}
-
-		/**
-   * 新增节点
-   * @param nodeOptions
-   */
-
-	}, {
-		key: 'appendNode',
-		value: function appendNode(nodeOptions) {
-			var node = nodeOptions instanceof _node2.default ? nodeOptions : this.createNode(nodeOptions);
-			console.log(node);
-
-			//this.cache.data[node.id] = nodeOptions
-			if (!this.nodes[node.id]) {
-				this.nodes[node.id] = node;
-				this.$board.appendChild(node.$element);
-			}
-		}
-
-		//右键菜单
-
-	}, {
-		key: 'menu',
-		value: function menu(event, menu) {
-			event.preventDefault();
-			var x = event.clientX + 'px';
-			var y = event.clientY + 'px';
-			var menu = document.querySelector('#menu');
-			menu.style.left = x;
-			menu.style.top = y;
-			menu.style.width = 130 + 'px';
-			menu.style.display = 'block';
-		}
-
-		//添加具体元素
-
-	}, {
-		key: 'addNode',
-		value: function addNode(node, jsonData, clickCount) {
-
-			var i = 0;
-			var currentId = node.$element.id.slice(5);
-			var nextNodeId = node.$element.nextElementSibling.id.slice(5);
-
-			jsonData.forEach(function (value, index) {
-
-				if (value.id == currentId) {
-					i = index;
-					nextNodeId = value.outgoing[0].targetRef;
-					value.outgoing[0].targetRef = "editable" + clickCount;
-
-					jsonData.forEach(function (value, index) {
-						if (value.id == nextNodeId) {
-							value.incoming[0].sourceRef = "editable" + clickCount;
-						}
-					});
-				}
-			});
-
-			var data = {
-
-				"taskUserList": [{
-					"taskId": "",
-					"formKey": "",
-					"businessKey": "",
-					"assignee": "",
-					"taskKey": "editable" + clickCount,
-					"endTime": null,
-					"taskName": "editable" + clickCount,
-					"variables": null,
-					"startTime": null,
-					"activitiId": "",
-					"businessTitle": "",
-					"taskStatus": "2",
-					"processInstanceId": "",
-					"companyId": "",
-					"comment": ""
-				}],
-				"id": "editable" + clickCount,
-				"incoming": [{
-					"id": "flow" + (clickCount + 7),
-					"targetRef": "editable" + clickCount,
-					"sourceRef": currentId
-				}],
-				"processInstanceId": "",
-				"businessKey": "",
-				"outgoing": [{
-					"id": "flow" + (clickCount + 8),
-					"targetRef": nextNodeId,
-					"sourceRef": "editable" + clickCount
-				}],
-				"elementType": "1",
-				"procDefId": ""
-
-			};
-
-			this.appendNode(data);
-
-			jsonData.splice(i + 1, 0, data);
-			console.log(jsonData);
-			this.refresh();
-		}
-		//删除节点
-
-	}, {
-		key: 'deleteNode',
-		value: function deleteNode(node, jsonData, clickCount) {
-			var _this14 = this;
-
-			var i = 0;
-			var currentId = node.$element.id.slice(5);
-
-			var nextNodeId = void 0;
-			var prevNodeId = void 0;
-			var currentNode = node.$element;
-			var nextNode = node.$element.nextElementSibling;
-			var prevNode = node.$element.previousElementSiblingSibling;
-
-			jsonData.forEach(function (value, index) {
-
-				if (value.id == currentId) {
-
-					i = index;
-					//前节点ID
-					prevNodeId = value.incoming[0].sourceRef;
-					//后节点ID
-					nextNodeId = value.outgoing[0].targetRef;
-					if (nextNodeId.indexOf("0") == -1) {
-						console.log("删除下级节点");
-						_this14.deleteUnderlingNode(jsonData, prevNodeId, currentId, nextNodeId);
-					} else {
-						console.log("删除同级分支");
-
-						jsonData.forEach(function (value, index) {
-							//对后节点进行修改
-							if (value.id == nextNodeId) {
-								value.incoming.forEach(function (value6, index6) {
-									if (value6.sourceRef == currentId) {
-										value.incoming.splice(index6, 1);
-									}
-									if (value6.sourceRef == prevNodeId) {
-										value.incoming.splice(index6, 1);
-									}
-								});
-
-								if (value.incoming.length == 0) {
-									value.incoming.push({ id: "flow" + (clickCount + 9), sourceRef: prevNodeId, targetRef: nextNodeId });
-									value.incoming[0].sourceRef == prevNodeId;
-								}
-							}
-							//对前节点进行修改
-							if (value.id == prevNodeId) {
-
-								value.outgoing.forEach(function (value1, index1) {
-									//删除同级分支
-									if (value1.targetRef == currentId) {
-
-										value.outgoing.splice(index1, 1);
-
-										//当同级分支只剩下一个时,自动转换为下级节点
-										if (value.outgoing.length == 2) {
-
-											//当节点仅为一个时,就将节点集合删除
-											if (nextNodeId.indexOf("0") != -1) {}
-										} else if (value.outgoing.length == 1 && value.incoming.length == 0) {
-
-											value.outgoing.push({ id: "flow" + (clickCount + 10), sourceRef: prevNodeId, targetRef: nextNodeId });
-										} else if (value.outgoing.length == 0) {
-											value.outgoing.push({ id: "flow" + (clickCount + 11), sourceRef: prevNodeId, targetRef: nextNodeId });
-										}
-									}
-								});
-							}
-						});
-					}
-				}
-			});
-
-			this.nodes[nextNodeId].left = parseInt(currentNode.style.left);
-			this.nodes[nextNodeId].top = parseInt(currentNode.style.top);
-			jsonData.splice(i, 1);
-			this.refresh();
-		}
-
-		//删除下级节点
-
-	}, {
-		key: 'deleteUnderlingNode',
-		value: function deleteUnderlingNode(jsonData, prevNodeId, currentId, nextNodeId) {
-			jsonData.forEach(function (value, index) {
-				if (value.id == nextNodeId) {
-					value.incoming[0].sourceRef = prevNodeId;
-				}
-
-				if (value.id == prevNodeId) {
-					value.outgoing.forEach(function (value, index) {
-
-						if (value.targetRef == currentId) {
-
-							value.targetRef = nextNodeId;
-						}
-					});
-				}
-			});
-		}
-		//添加分支
-
-	}, {
-		key: 'addBranch',
-		value: function addBranch(node, jsonData, clickCount) {
-			var _this15 = this;
-
-			var i = 0;
-			var currentId = node.$element.id.slice(5);
-
-			var nextNodeId = void 0;
-			var prevNodeId = void 0;
-			var data = {}; //数据模板
-			var nodeGroup = {}; //节点集合
-
-			var nodesArr = [];
-
-			jsonData.forEach(function (value, index) {
-
-				if (value.id == currentId) {
-
-					i = index;
-					//前节点ID
-					prevNodeId = value.incoming[0].sourceRef;
-					//后节点ID
-					nextNodeId = value.outgoing[0].targetRef;
-
-					data = {
-
-						"taskUserList": [{
-							"taskId": "",
-							"formKey": "",
-							"businessKey": "",
-							"assignee": "",
-							"taskKey": "editable" + clickCount,
-							"endTime": null,
-							"taskName": "editable" + clickCount,
-							"variables": null,
-							"startTime": null,
-							"activitiId": "",
-							"businessTitle": "",
-							"taskStatus": "2",
-							"processInstanceId": "",
-							"companyId": "",
-							"comment": ""
-						}],
-						"id": "editable" + clickCount,
-						"incoming": [{
-							"id": "flow9",
-							"targetRef": "editable" + clickCount,
-							"sourceRef": prevNodeId
-						}],
-						"processInstanceId": "",
-						"businessKey": "",
-						"outgoing": [{
-							"id": "flow10",
-							"targetRef": "editable0" + clickCount,
-							"sourceRef": "editable" + clickCount
-						}],
-						"elementType": "1",
-						"procDefId": "",
-						"approver": ""
-
-					};
-					if (nextNodeId.indexOf("0") == -1) {
-						value.outgoing[0].targetRef = "editable0" + clickCount;
-					} else {
-						jsonData.forEach(function (v) {
-							if (v.id == nextNodeId) {
-
-								value.outgoing[0].targetRef = nextNodeId;
-								data.outgoing[0].targetRef = nextNodeId;
-							}
-						});
-					}
-
-					//遍历this.options.nodes
-					jsonData.forEach(function (value, index) {
-
-						//设置后节点的incoming
-						if (value.id == nextNodeId) {
-
-							console.log(value);
-							console.log();
-							var incomingData = { id: "flow" + clickCount, sourceRef: "editable" + clickCount, targetRef: "editable0" + clickCount };
-
-							//深拷贝对象
-							nodeGroup = _this15.deepCopy(data);
-
-							nodeGroup.incoming = value.incoming;
-							nodeGroup.incoming.push(incomingData);
-
-							nodeGroup.taskUserList[0]["taskName"] = "节点集合0" + clickCount;
-							nodeGroup.id = nodeGroup.taskUserList[0]["taskKey"] = "editable0" + clickCount;
-							nodeGroup.elementType = 4;
-
-							nodeGroup.incoming.forEach(function (value) {
-
-								value.targetRef = "editable0" + clickCount;
-							});
-
-							nodeGroup.outgoing = [{ id: "flow10", sourceRef: "editable0" + clickCount, targetRef: nextNodeId }];
-
-							if (nextNodeId.indexOf("0") == -1) {
-								value.incoming = [{ id: "flow" + clickCount, sourceRef: "editable0" + clickCount, targetRef: nextNodeId }];
-							}
-						}
-						//设置前节点的outgoing
-						if (value.id == prevNodeId) {
-
-							var outgoingData = { id: "flow" + clickCount, sourceRef: prevNodeId, targetRef: "editable" + clickCount };
-							value.outgoing.push(outgoingData);
-						}
-					});
-				}
-			});
-
-			jsonData.splice(i + 1, 0, data);
-			//如果后节点是网关不必再添加网关
-			if (nextNodeId.indexOf("0") == -1) {
-				jsonData.splice(i + 1, 0, nodeGroup);
-			}
-			console.log(nodeGroup);
-			console.log(jsonData);
-			this.refresh();
-		}
-
-		//刷新初始化
-
-	}, {
-		key: 'refresh',
-		value: function refresh() {
-			this.initBoard();
-			this.initNodes();
-			this.layoutNodes();
-			this.drawCurves();
-			this.watchNodeOffset();
-		}
-
-		//修改属性
-
-	}, {
-		key: 'modifyAttr',
-		value: function modifyAttr(node, jsonData) {
-			var currentId = node.$element.id.slice(5);
-
-			var textList = document.querySelector('#textlist');
-
-			textList.style.display = 'block';
-
-			document.getElementById("confirm1").onclick = function () {
-				var inputText = document.getElementById("name").value;
-				jsonData.forEach(function (value, index) {
-					if (value.id == currentId) {
-						value.taskUserList.forEach(function (value, index) {
-
-							if (confirm("是否要更改审批人")) {
-								value.assigneeName = inputText;
-							}
-							inputText = "";
-						});
-						inputText = "";
-					}
-				});
-
-				textList.style.display = 'none';
-			};
-		}
-
-		//深拷贝
-
-	}, {
-		key: 'deepCopy',
-		value: function deepCopy(source) {
-			var result;
-			source instanceof Array ? result = [] : result = {};
-
-			for (var key in source) {
-				result[key] = _typeof(source[key]) === 'object' ? this.deepCopy(source[key]) : source[key];
-			}
-			return result;
-		}
-	}]);
-
-	return Workflow;
+
+  _createClass(Workflow, [{
+    key: 'initBoard',
+    value: function initBoard() {
+      var elem = this.options.element;
+
+      if (elem) {
+        elem.classList.add('workflower');
+
+        elem.innerHTML = '\n        <div class="workflower">\n          <div class="workflower-board">\n            <svg class="workflower-paths"></svg>\n          </div>\n        </div>';
+
+        this.$element = elem;
+        this.$board = elem.getElementsByClassName('workflower-board')[0];
+        this.$paths = elem.getElementsByClassName('workflower-paths')[0];
+      }
+    }
+
+    /**
+     * 初始化节点
+     */
+
+  }, {
+    key: 'initNodes',
+    value: function initNodes() {
+      var _this2 = this;
+
+      var nodes = this.options.nodes;
+
+      nodes.forEach(function (data) {
+        var node = _this2.createNode(data);
+
+        _this2.cache.data = _this2.cache.data || {};
+        _this2.cache.data[data.id] = data;
+
+        if (node) {
+          _this2.nodes[data.id] = node;
+          node.renderTo(_this2.$board);
+        }
+      });
+
+      nodes.forEach(function (data) {
+
+        var node = _this2.resolveNode(data.id);
+
+        if (node) {
+          node.updateStatus(data.taskUserList.length > 0 ? data.taskUserList[0].taskStatus : '');
+        }
+      });
+    }
+
+    /**
+     * 点击事件
+     */
+
+  }, {
+    key: 'delegateEvents',
+    value: function delegateEvents() {
+      var _this3 = this;
+
+      this.on('resize', function () {
+        _this3.updateCanvasSize();
+      });
+
+      this.$element.addEventListener('click', function (event) {
+        var target = event.target;
+
+        while (target) {
+          if (target.classList && target.classList.contains('workflower-node')) {
+            var nodeId = target.getAttribute('data-id');
+            var node = _this3.nodes[nodeId];
+
+            /**
+             * @emits {click} 节点点击事件，传入事件函数的参数：event, clickedComponentType == 'node', componentData = nodeData
+             */
+            _this3.emit('onNodeClick', event, node);
+
+            /**
+             * @emits {click} 全局点击事件，传入事件函数的参数：event, clickedComponentType == 'node', componentData = nodeData
+             */
+            _this3.emit('click', event, 'node', node);
+            _this3.emit('contextmenu', event, node);
+            break;
+          } else {
+            target = target.parentNode;
+          }
+        }
+      });
+      //右键
+      this.$element.addEventListener('contextmenu', function (event) {
+        var target = event.target;
+
+        while (target) {
+          if (target.classList && target.classList.contains('workflower-node')) {
+            var nodeId = target.getAttribute('data-id');
+            var node = _this3.nodes[nodeId];
+            _this3.emit('rightClick', event, node, target);
+            break;
+          } else {
+            target = target.parentNode;
+          }
+        }
+      });
+    }
+  }, {
+    key: 'watchNodeOffset',
+    value: function watchNodeOffset() {
+      var _this4 = this;
+
+      Object.keys(this.nodes).forEach(function (id) {
+        var node = _this4.nodes[id];
+
+        node.on('layoutChange', function (prop, old, val) {
+
+          _this4.updateCureveOfNode(node);
+
+          _this4.emit('resize');
+        });
+      });
+    }
+  }, {
+    key: 'createNode',
+    value: function createNode(data) {
+      var node = void 0;
+
+      node = this.nodes[data.id] || new _node2.default(data);
+
+      return node;
+    }
+
+    /**
+     * 把 node id 转成 Node 实例
+     * @param {String|Node} id
+     * @returns {Node}
+     */
+
+  }, {
+    key: 'resolveNode',
+    value: function resolveNode(id) {
+      return typeof id === 'string' ? this.nodes[id] : id;
+    }
+
+    /**
+     * 把 数据 id 转成 Data 实例
+     * @param {String|Node} id
+     * @returns {Node}
+     */
+
+  }, {
+    key: 'resolveData',
+    value: function resolveData(id) {
+      return typeof id === 'string' ? this.cache.data[id] : id;
+    }
+
+    /**
+     * 节点排列
+     */
+
+  }, {
+    key: 'layoutNodes',
+    value: function layoutNodes(nodes) {
+      var _this5 = this;
+
+      var startY = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var startX = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+      var padding = parseInt(this.options.padding);
+      var topCount = startY;
+      var top = startY;
+      var left = startX + padding;
+      var bottom = startY + padding;
+      var leftOfNextLevel = void 0;
+      var topOfNextLevel = void 0;
+
+      nodes = nodes || this.getRootNodes();
+      if (nodes && nodes instanceof Array) {
+        var currentLevelTop = top;
+
+        nodes.forEach(function (node) {
+          var targets = _this5.getTargetNodes(node);
+
+          topOfNextLevel = top;
+          leftOfNextLevel = left + parseInt(node.width);
+
+          if (targets.length > 0) {
+            var childArea = _this5.layoutNodes(targets, top, leftOfNextLevel);
+            var sup_top = childArea.top + (childArea.bottom - childArea.top) / 2;
+
+            node.top = sup_top;
+          } else {
+            node.top = top;
+          }
+
+          node.left = Math.max(node.left, left);
+
+          topCount = topOfNextLevel;
+          top += padding + parseInt(node.height);
+        });
+      }
+
+      this.emit('resize');
+
+      return {
+        top: startY,
+        bottom: top,
+        left: startX,
+        right: left + leftOfNextLevel,
+        children: nodes.length
+        // childrenGap:
+      };
+    }
+
+    /**
+     * 更新节点的连接线
+     * @param {Node} node
+     */
+
+  }, {
+    key: 'updateCureveOfNode',
+    value: function updateCureveOfNode(node) {
+      var _this6 = this;
+
+      var sourceNodes = this.getSourceNodes(node);
+      var targetNodes = this.getTargetNodes(node);
+      var point = node.getPoint();
+
+      // 更新入口的连接线
+      sourceNodes.forEach(function (source) {
+        var curveId = source.id + '->' + node.id;
+        var curve = _this6.lines[curveId];
+
+        if (curve) {
+          curve.endX = point.left;
+          curve.endY = point.top;
+        }
+      });
+
+      // 更新出口的连接线
+      targetNodes.forEach(function (target) {
+        var curveId = node.id + '->' + target.id;
+        var curve = _this6.lines[curveId];
+
+        if (curve) {
+          curve.startX = point.left;
+          curve.startY = point.top;
+        }
+      });
+    }
+
+    /**
+     * 连线
+     */
+
+  }, {
+    key: 'drawCurves',
+    value: function drawCurves(nodes) {
+      var _this7 = this;
+
+      nodes = nodes || this.getRootNodes();
+
+      if (nodes && nodes instanceof Array) {
+        nodes.forEach(function (node) {
+          var sourceOffset = node.getPoint();
+          var targets = _this7.getTargetNodes(node);
+
+          sourceOffset.left += sourceOffset.width / 2;
+
+          targets.forEach(function (target) {
+            var targetOffset = target.getPoint();
+            targetOffset.left -= 4;
+            var curve = new _curve2.default(sourceOffset, targetOffset);
+            var path = curve.draw();
+            var curveId = node.id + '->' + target.id;
+
+            curve.id = curveId;
+            _this7.lines[curveId] = curve;
+            _this7.$paths.appendChild(path);
+          });
+
+          _this7.drawCurves(targets);
+        });
+      }
+    }
+
+    /**
+     * 获取根节点
+     */
+
+  }, {
+    key: 'getRootNodes',
+    value: function getRootNodes() {
+      var _this8 = this;
+
+      var cache = this.cache[Workflow.ROOTS];
+
+      if (cache) {
+        return cache;
+      } else {
+        var roots = [];
+
+        Object.keys(this.nodes).forEach(function (id) {
+          var node = _this8.nodes[id];
+
+          if (parseInt(node.data.elementType) === 0) {
+            roots.push(node);
+          }
+        });
+
+        return this.cache[Workflow.ROOTS] = roots;
+      }
+    }
+
+    /**
+     * 获取来源节点
+     * @param {String|Node} id
+     * @returns {Array<Node>}
+     */
+
+  }, {
+    key: 'getSourceNodes',
+    value: function getSourceNodes(id) {
+      var _this9 = this;
+
+      var node = this.resolveNode(id);
+      var list = node.data.incoming || [];
+      var result = [];
+
+      list.forEach(function (source) {
+        var node = _this9.nodes[source.sourceRef];
+
+        if (node) {
+          result.push(node);
+        }
+      });
+
+      return result;
+    }
+
+    /**
+     * 获取来源数据
+     * @param {String} id
+     * @returns {Array}
+     */
+
+  }, {
+    key: 'getSourceData',
+    value: function getSourceData(id) {
+      var _this10 = this;
+
+      var data = this.resolveData(id);
+      var list = data.incoming || [];
+      var result = [];
+
+      list.forEach(function (source) {
+        var data = _this10.cache.data[source.sourceRef];
+
+        if (data) {
+          result.push(data);
+        }
+      });
+
+      return result;
+    }
+
+    /**
+     * 获取目标节点
+     * @param {String|Node} id
+     * @returns {Array<Node>}
+     */
+
+  }, {
+    key: 'getTargetNodes',
+    value: function getTargetNodes(id) {
+      var _this11 = this;
+
+      var node = this.resolveNode(id);
+      var list = node.data.outgoing || [];
+      var result = [];
+
+      list.forEach(function (target) {
+        var node = _this11.nodes[target.targetRef];
+
+        if (node) {
+          result.push(node);
+        }
+      });
+
+      return result;
+    }
+
+    /**
+     * 获取目标数据
+     * @param {String} id
+     * @returns {Array}
+     */
+
+  }, {
+    key: 'getTargetData',
+    value: function getTargetData(id) {
+      var _this12 = this;
+
+      var data = this.resolveData(id);
+      var list = data.outgoing || [];
+      var result = [];
+
+      list.forEach(function (target) {
+        var data = _this12.cache.data[target.targetRef];
+
+        if (data) {
+          result.push(data);
+        }
+      });
+
+      return result;
+    }
+
+    /**
+     * 更新画板尺寸大小
+     */
+
+  }, {
+    key: 'updateCanvasSize',
+    value: function updateCanvasSize() {
+      var _this13 = this;
+
+      var x = 0;
+      var y = 0;
+
+      Object.keys(this.nodes).forEach(function (id) {
+        var node = _this13.nodes[id];
+        var point = node.getPoint();
+
+        x = Math.max(x, point.right);
+        y = Math.max(y, point.bottom);
+      });
+
+      this.$board.style.width = x + 'px';
+      this.$board.style.height = y + 'px';
+    }
+
+    /**
+     * 新增节点
+     * @param nodeOptions
+     */
+
+  }, {
+    key: 'appendNode',
+    value: function appendNode(nodeOptions) {
+      var node = nodeOptions instanceof _node2.default ? nodeOptions : this.createNode(nodeOptions);
+      console.log(node);
+
+      //this.cache.data[node.id] = nodeOptions
+      if (!this.nodes[node.id]) {
+        this.nodes[node.id] = node;
+        this.$board.appendChild(node.$element);
+      }
+    }
+
+    //右键菜单
+
+  }, {
+    key: 'menu',
+    value: function menu(event, menu) {
+      event.preventDefault();
+      var x = event.clientX + 'px';
+      var y = event.clientY + 'px';
+      var menu = document.querySelector('#menu');
+      menu.style.left = x;
+      menu.style.top = y;
+      menu.style.width = 130 + 'px';
+      menu.style.display = 'block';
+    }
+
+    //添加具体元素
+
+  }, {
+    key: 'addNode',
+    value: function addNode(node, jsonData, clickCount) {
+
+      var i = 0;
+      var currentId = node.$element.id.slice(5);
+      var nextNodeId = node.$element.nextElementSibling.id.slice(5);
+
+      jsonData.forEach(function (value, index) {
+
+        if (value.id == currentId) {
+          i = index;
+          nextNodeId = value.outgoing[0].targetRef;
+          value.outgoing[0].targetRef = "editable" + clickCount;
+
+          jsonData.forEach(function (value, index) {
+            if (value.id == nextNodeId) {
+              value.incoming[0].sourceRef = "editable" + clickCount;
+            }
+          });
+        }
+      });
+
+      var data = {
+
+        "taskUserList": [{
+          "taskId": "",
+          "formKey": "",
+          "businessKey": "",
+          "assignee": "",
+          "taskKey": "editable" + clickCount,
+          "endTime": null,
+          "taskName": "editable" + clickCount,
+          "variables": null,
+          "startTime": null,
+          "activitiId": "",
+          "businessTitle": "",
+          "taskStatus": "2",
+          "processInstanceId": "",
+          "companyId": "",
+          "comment": ""
+        }],
+        "id": "editable" + clickCount,
+        "incoming": [{
+          "id": "flow" + (clickCount + 7),
+          "targetRef": "editable" + clickCount,
+          "sourceRef": currentId
+        }],
+        "processInstanceId": "",
+        "businessKey": "",
+        "outgoing": [{
+          "id": "flow" + (clickCount + 8),
+          "targetRef": nextNodeId,
+          "sourceRef": "editable" + clickCount
+        }],
+        "elementType": "1",
+        "procDefId": ""
+
+      };
+
+      this.appendNode(data);
+
+      jsonData.splice(i + 1, 0, data);
+      console.log(jsonData);
+      this.refresh();
+    }
+
+    //删除节点
+
+  }, {
+    key: 'deleteNode',
+    value: function deleteNode(node, jsonData, clickCount) {
+      var _this14 = this;
+
+      var i = 0;
+      var currentId = node.$element.id.slice(5);
+
+      var nextNodeId = void 0;
+      var prevNodeId = void 0;
+      var currentNode = node.$element;
+      var nextNode = node.$element.nextElementSibling;
+      var prevNode = node.$element.previousElementSiblingSibling;
+
+      jsonData.forEach(function (value, index) {
+
+        if (value.id == currentId) {
+
+          i = index;
+          //前节点ID
+          prevNodeId = value.incoming[0].sourceRef;
+          //后节点ID
+          nextNodeId = value.outgoing[0].targetRef;
+          if (nextNodeId.indexOf("0") == -1) {
+            console.log("删除下级节点");
+            _this14.deleteUnderlingNode(jsonData, prevNodeId, currentId, nextNodeId);
+          } else {
+            console.log("删除同级分支");
+
+            jsonData.forEach(function (value, index) {
+              //对后节点进行修改
+              if (value.id == nextNodeId) {
+                value.incoming.forEach(function (value6, index6) {
+                  if (value6.sourceRef == currentId) {
+                    value.incoming.splice(index6, 1);
+                  }
+                  if (value6.sourceRef == prevNodeId) {
+                    value.incoming.splice(index6, 1);
+                  }
+                });
+
+                if (value.incoming.length == 0) {
+                  value.incoming.push({ id: "flow" + (clickCount + 9), sourceRef: prevNodeId, targetRef: nextNodeId });
+                  value.incoming[0].sourceRef == prevNodeId;
+                }
+              }
+              //对前节点进行修改
+              if (value.id == prevNodeId) {
+
+                value.outgoing.forEach(function (value1, index1) {
+                  //删除同级分支
+                  if (value1.targetRef == currentId) {
+
+                    value.outgoing.splice(index1, 1);
+
+                    //当同级分支只剩下一个时,自动转换为下级节点
+                    if (value.outgoing.length == 2) {
+
+                      //当节点仅为一个时,就将节点集合删除
+                      if (nextNodeId.indexOf("0") != -1) {}
+                    } else if (value.outgoing.length == 1 && value.incoming.length == 0) {
+
+                      value.outgoing.push({ id: "flow" + (clickCount + 10), sourceRef: prevNodeId, targetRef: nextNodeId });
+                    } else if (value.outgoing.length == 0) {
+                      value.outgoing.push({ id: "flow" + (clickCount + 11), sourceRef: prevNodeId, targetRef: nextNodeId });
+                    }
+                  }
+                });
+              }
+            });
+          }
+        }
+      });
+
+      this.nodes[nextNodeId].left = parseInt(currentNode.style.left);
+      this.nodes[nextNodeId].top = parseInt(currentNode.style.top);
+      jsonData.splice(i, 1);
+      this.refresh();
+    }
+
+    //删除下级节点
+
+  }, {
+    key: 'deleteUnderlingNode',
+    value: function deleteUnderlingNode(jsonData, prevNodeId, currentId, nextNodeId) {
+      jsonData.forEach(function (value, index) {
+        if (value.id == nextNodeId) {
+          value.incoming[0].sourceRef = prevNodeId;
+        }
+
+        if (value.id == prevNodeId) {
+          value.outgoing.forEach(function (value, index) {
+
+            if (value.targetRef == currentId) {
+
+              value.targetRef = nextNodeId;
+            }
+          });
+        }
+      });
+    }
+
+    //添加分支
+
+  }, {
+    key: 'addBranch',
+    value: function addBranch(node, jsonData, clickCount) {
+      var _this15 = this;
+
+      var i = 0;
+      var currentId = node.$element.id.slice(5);
+
+      var nextNodeId = void 0;
+      var prevNodeId = void 0;
+      var data = {}; //数据模板
+      var nodeGroup = {}; //节点集合
+
+      var nodesArr = [];
+
+      jsonData.forEach(function (value, index) {
+
+        if (value.id == currentId) {
+
+          i = index;
+          //前节点ID
+          prevNodeId = value.incoming[0].sourceRef;
+          //后节点ID
+          nextNodeId = value.outgoing[0].targetRef;
+
+          data = {
+
+            "taskUserList": [{
+              "taskId": "",
+              "formKey": "",
+              "businessKey": "",
+              "assignee": "",
+              "taskKey": "editable" + clickCount,
+              "endTime": null,
+              "taskName": "editable" + clickCount,
+              "variables": null,
+              "startTime": null,
+              "activitiId": "",
+              "businessTitle": "",
+              "taskStatus": "2",
+              "processInstanceId": "",
+              "companyId": "",
+              "comment": ""
+            }],
+            "id": "editable" + clickCount,
+            "incoming": [{
+              "id": "flow9",
+              "targetRef": "editable" + clickCount,
+              "sourceRef": prevNodeId
+            }],
+            "processInstanceId": "",
+            "businessKey": "",
+            "outgoing": [{
+              "id": "flow10",
+              "targetRef": "editable0" + clickCount,
+              "sourceRef": "editable" + clickCount
+            }],
+            "elementType": "1",
+            "procDefId": "",
+            "approver": ""
+
+          };
+          if (nextNodeId.indexOf("0") == -1) {
+            value.outgoing[0].targetRef = "editable0" + clickCount;
+          } else {
+            jsonData.forEach(function (v) {
+              if (v.id == nextNodeId) {
+
+                value.outgoing[0].targetRef = nextNodeId;
+                data.outgoing[0].targetRef = nextNodeId;
+              }
+            });
+          }
+
+          //遍历this.options.nodes
+          jsonData.forEach(function (value, index) {
+
+            //设置后节点的incoming
+            if (value.id == nextNodeId) {
+
+              console.log(value);
+              console.log();
+              var incomingData = {
+                id: "flow" + clickCount,
+                sourceRef: "editable" + clickCount,
+                targetRef: "editable0" + clickCount
+              };
+
+              //深拷贝对象
+              nodeGroup = _this15.deepCopy(data);
+
+              nodeGroup.incoming = value.incoming;
+              nodeGroup.incoming.push(incomingData);
+
+              nodeGroup.taskUserList[0]["taskName"] = "节点集合0" + clickCount;
+              nodeGroup.id = nodeGroup.taskUserList[0]["taskKey"] = "editable0" + clickCount;
+              nodeGroup.elementType = 4;
+
+              nodeGroup.incoming.forEach(function (value) {
+
+                value.targetRef = "editable0" + clickCount;
+              });
+
+              nodeGroup.outgoing = [{ id: "flow10", sourceRef: "editable0" + clickCount, targetRef: nextNodeId }];
+
+              if (nextNodeId.indexOf("0") == -1) {
+                value.incoming = [{ id: "flow" + clickCount, sourceRef: "editable0" + clickCount, targetRef: nextNodeId }];
+              }
+            }
+            //设置前节点的outgoing
+            if (value.id == prevNodeId) {
+
+              var outgoingData = { id: "flow" + clickCount, sourceRef: prevNodeId, targetRef: "editable" + clickCount };
+              value.outgoing.push(outgoingData);
+            }
+          });
+        }
+      });
+
+      jsonData.splice(i + 1, 0, data);
+      //如果后节点是网关不必再添加网关
+      if (nextNodeId.indexOf("0") == -1) {
+        jsonData.splice(i + 1, 0, nodeGroup);
+      }
+      console.log(nodeGroup);
+      console.log(jsonData);
+      this.refresh();
+    }
+
+    //刷新初始化
+
+  }, {
+    key: 'refresh',
+    value: function refresh() {
+      this.initBoard();
+      this.initNodes();
+      this.layoutNodes();
+      this.drawCurves();
+      this.watchNodeOffset();
+    }
+
+    //修改属性
+
+  }, {
+    key: 'modifyAttr',
+    value: function modifyAttr(node, jsonData) {
+      var currentId = node.$element.id.slice(5);
+
+      var textList = document.querySelector('#textlist');
+
+      textList.style.display = 'block';
+
+      document.getElementById("confirm1").onclick = function () {
+        var inputText = document.getElementById("name").value;
+        jsonData.forEach(function (value, index) {
+          if (value.id == currentId) {
+            value.taskUserList.forEach(function (value, index) {
+
+              if (confirm("是否要更改审批人")) {
+                value.assigneeName = inputText;
+              }
+              inputText = "";
+            });
+            inputText = "";
+          }
+        });
+
+        textList.style.display = 'none';
+      };
+    }
+
+    //深拷贝
+
+  }, {
+    key: 'deepCopy',
+    value: function deepCopy(source) {
+      var result;
+      source instanceof Array ? result = [] : result = {};
+
+      for (var key in source) {
+        result[key] = _typeof(source[key]) === 'object' ? this.deepCopy(source[key]) : source[key];
+      }
+      return result;
+    }
+  }]);
+
+  return Workflow;
 }(_watch2.default);
 
 Workflow.ROOTS = 'ROOTS';
@@ -3429,7 +3435,7 @@ exports = module.exports = __webpack_require__(9)(undefined);
 
 
 // module
-exports.push([module.i, "/*!\n * Workflower\n * A simple workflow editor\n * https://github.com/workflower-js/workflower\n */.workflower{position:relative;width:100%;height:100%;overflow:auto;-webkit-touch-callout:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.workflower *,.workflower :after,.workflower :before{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.workflower .workflower-board{width:2000px;height:2000px;position:absolute;top:0;left:0;-o-background-size:10px;background-size:10px}.workflower svg.workflower-paths{width:100%;height:100%;position:absolute;top:0;left:0}.workflower svg.workflower-paths path{stroke-dasharray:0;fill:transparent;stroke:#ccc;stroke-width:2}.workflower .workflower-node{-webkit-border-radius:5px;border-radius:5px;width:100px;position:absolute;-webkit-transition:.3s;-o-transition:.3s;-moz-transition:.3s;transition:.3s;overflow:hidden}.workflower .workflower-node:active,.workflower .workflower-node:focus,.workflower .workflower-node:hover{background-color:rgba(0,0,0,.05)}.workflower .workflower-node>h3{background-color:#45536e;color:#fff;font-size:14px;text-align:center;-webkit-border-radius:5px 5px 0 0;border-radius:5px 5px 0 0;margin:0;padding:5px 0;cursor:move}.workflower .workflower-node>h3 .remove,.workflower .workflower-node>h3 .setting{position:absolute;top:5px;right:4px;background-color:#323c50;padding:0 5px 2px;-webkit-border-radius:4px;border-radius:4px;color:#3f4c65;font-family:Tahoma,serif;font-weight:400;cursor:pointer;-webkit-transition:background-color .3s;-o-transition:background-color .3s;-moz-transition:background-color .3s;transition:background-color .3s}.workflower .workflower-node>h3 .remove:after,.workflower .workflower-node>h3 .setting:after{content:\"x\";display:block}.workflower .workflower-node>h3 .remove:hover,.workflower .workflower-node>h3 .setting:hover{background-color:#a30f0f}.workflower .workflower-node>h3 .setting{width:11px;height:11px;right:auto;left:3px;padding:4px;fill:#697896}.workflower .workflower-node>h3 .setting:after{display:none}.workflower .workflower-node>h3 .setting:hover{background-color:#8396bb;fill:#2e3542}.workflower .workflower-node:after{content:\" \";height:1px;display:block;clear:both}.workflower .workflower-node.type-3 .workflower-label{position:relative;left:200%}.workflower .workflower-node.type-0 h4:empty:before{content:\"\\5F00\\59CB\";opacity:.5}.workflower .workflower-node.type-2 h4:empty:before,.workflower .workflower-node.type-4 h4:empty:before{content:\"\\7ED3\\675F\";opacity:.5}.workflower .workflower-inputs{margin-left:-5px;float:left}.workflower .workflower-inputs .workflower-point{margin:2px 4px 0 0;float:left}.workflower .workflower-outputs{margin-right:-5px;float:right;text-align:right}.workflower .workflower-outputs .workflower-point{margin:2px 0 0 4px;cursor:pointer;float:right}.workflower .workflower-label{margin:20px 0 6px;font-size:12px;font-family:sans-serif;color:#697690;cursor:default}.workflower .workflower-label .workflower-picture{display:none;width:50px;height:50px;-webkit-border-radius:50%;border-radius:50%;background-color:rgba(0,0,0,.06);background-image:url(\"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDUwIDUwIiBoZWlnaHQ9IjUwcHgiIGlkPSJMYXllcl8xIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA1MCA1MCIgd2lkdGg9IjUwcHgiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxjaXJjbGUgY3g9IjI1IiBjeT0iMjUiIGZpbGw9Im5vbmUiIHI9IjI0IiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2Utd2lkdGg9IjIiLz48cmVjdCBmaWxsPSJub25lIiBoZWlnaHQ9IjUwIiB3aWR0aD0iNTAiLz48cGF0aCBkPSJNMjkuOTMzLDM1LjUyOGMtMC4xNDYtMS42MTItMC4wOS0yLjczNy0wLjA5LTQuMjFjMC43My0wLjM4MywyLjAzOC0yLjgyNSwyLjI1OS00Ljg4OGMwLjU3NC0wLjA0NywxLjQ3OS0wLjYwNywxLjc0NC0yLjgxOCAgYzAuMTQzLTEuMTg3LTAuNDI1LTEuODU1LTAuNzcxLTIuMDY1YzAuOTM0LTIuODA5LDIuODc0LTExLjQ5OS0zLjU4OC0xMi4zOTdjLTAuNjY1LTEuMTY4LTIuMzY4LTEuNzU5LTQuNTgxLTEuNzU5ICBjLTguODU0LDAuMTYzLTkuOTIyLDYuNjg2LTcuOTgxLDE0LjE1NmMtMC4zNDUsMC4yMS0wLjkxMywwLjg3OC0wLjc3MSwyLjA2NWMwLjI2NiwyLjIxMSwxLjE3LDIuNzcxLDEuNzQ0LDIuODE4ICBjMC4yMiwyLjA2MiwxLjU4LDQuNTA1LDIuMzEyLDQuODg4YzAsMS40NzMsMC4wNTUsMi41OTgtMC4wOTEsNC4yMWMtMS4yNjEsMy4zOS03LjczNywzLjY1NS0xMS40NzMsNi45MjQgIGMzLjkwNiwzLjkzMywxMC4yMzYsNi43NDYsMTYuOTE2LDYuNzQ2czE0LjUzMi01LjI3NCwxNS44MzktNi43MTNDMzcuNjg4LDM5LjE4NiwzMS4xOTcsMzguOTMsMjkuOTMzLDM1LjUyOHoiLz48L3N2Zz4=\");-o-background-size:cover;background-size:cover;text-align:center;margin:auto;overflow:hidden;opacity:.1}.workflower .workflower-label .workflower-picture img{max-width:100%}.workflower .workflower-label h4{text-align:center;margin:5px}.workflower .workflower-label h4:empty:before{content:\"\\672A\\547D\\540D\\8282\\70B9\";opacity:.5}.workflower .type-0 .workflower-point,.workflower [data-id^=startevent] .workflower-point{background-color:green}.workflower .type-0 .workflower-point:after,.workflower [data-id^=startevent] .workflower-point:after{content:\"\";display:block;width:35%;height:50%;position:absolute;left:50%;top:50%;margin:-8px 0 0 -4px;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);-o-transform:rotate(45deg);transform:rotate(45deg);border:2px solid transparent;border-right-color:#fff;border-bottom-color:#fff}.workflower .workflower-point{background-color:#ccc;width:24px;height:24px;-webkit-border-radius:50%;border-radius:50%;margin:auto;position:relative}.workflower .workflower-point.selected{background-color:#ffe63f}.workflower .workflower-point.status-0{background-color:green}.workflower .workflower-point.status-0:after{content:\"\";display:block;width:35%;height:50%;position:absolute;left:50%;top:50%;margin:-8px 0 0 -4px;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);-o-transform:rotate(45deg);transform:rotate(45deg);border:2px solid transparent;border-right-color:#fff;border-bottom-color:#fff}.workflower .workflower-point.status-1{background-color:#2f86d5}.workflower .workflower-point.status-2{background-color:#ccc}.workflower .workflower-point.status-3{background-color:red}.workflower .workflower-point.status-3:after{content:\"X\";display:-webkit-box;display:-webkit-flex;display:-moz-box;display:-ms-flexbox;display:flex;position:absolute;left:0;top:0;right:0;bottom:0;text-align:center;-webkit-box-pack:center;-webkit-justify-content:center;-moz-box-pack:center;-ms-flex-pack:center;justify-content:center;-webkit-align-content:center;-ms-flex-line-pack:center;align-content:center;color:#fff;font-size:16px}", ""]);
+exports.push([module.i, "/*!\n * Workflower\n * A simple workflow editor\n * https://github.com/workflower-js/workflower\n */.workflower{position:relative;width:100%;height:100%;overflow:auto;-webkit-touch-callout:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.workflower *,.workflower :after,.workflower :before{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.workflower .workflower-board{width:2000px;height:2000px;position:absolute;top:0;left:0;-o-background-size:10px;background-size:10px}.workflower svg.workflower-paths{width:100%;height:100%;position:absolute;top:0;left:0}.workflower svg.workflower-paths path{stroke-dasharray:0;fill:transparent;stroke:#ccc;stroke-width:2}.workflower .workflower-node{-webkit-border-radius:5px;border-radius:5px;width:100px;position:absolute;-webkit-transition:.3s;-o-transition:.3s;-moz-transition:.3s;transition:.3s;overflow:hidden}.workflower .workflower-node:active,.workflower .workflower-node:focus,.workflower .workflower-node:hover{background-color:rgba(0,0,0,.05)}.workflower .workflower-node>h3{background-color:#45536e;color:#fff;font-size:14px;text-align:center;-webkit-border-radius:5px 5px 0 0;border-radius:5px 5px 0 0;margin:0;padding:5px 0;cursor:move}.workflower .workflower-node>h3 .remove,.workflower .workflower-node>h3 .setting{position:absolute;top:5px;right:4px;background-color:#323c50;padding:0 5px 2px;-webkit-border-radius:4px;border-radius:4px;color:#3f4c65;font-family:Tahoma,serif;font-weight:400;cursor:pointer;-webkit-transition:background-color .3s;-o-transition:background-color .3s;-moz-transition:background-color .3s;transition:background-color .3s}.workflower .workflower-node>h3 .remove:after,.workflower .workflower-node>h3 .setting:after{content:\"x\";display:block}.workflower .workflower-node>h3 .remove:hover,.workflower .workflower-node>h3 .setting:hover{background-color:#a30f0f}.workflower .workflower-node>h3 .setting{width:11px;height:11px;right:auto;left:3px;padding:4px;fill:#697896}.workflower .workflower-node>h3 .setting:after{display:none}.workflower .workflower-node>h3 .setting:hover{background-color:#8396bb;fill:#2e3542}.workflower .workflower-node:after{content:\" \";height:1px;display:block;clear:both}.workflower .workflower-node h4:before{content:\"\";display:inline-block;line-height:1.5rem;height:1.5rem}.workflower .workflower-node.type-3 .workflower-label{position:relative;left:200%}.workflower .workflower-node.type-0 h4:empty:before{content:\"\\5F00\\59CB\";opacity:.5}.workflower .workflower-node.type-4 h4:empty:before{content:\"\";opacity:.5}.workflower .workflower-node.type-2 h4:empty:before{content:\"\\7ED3\\675F\";opacity:.5}.workflower .workflower-inputs{margin-left:-5px;float:left}.workflower .workflower-inputs .workflower-point{margin:2px 4px 0 0;float:left}.workflower .workflower-outputs{margin-right:-5px;float:right;text-align:right}.workflower .workflower-outputs .workflower-point{margin:2px 0 0 4px;cursor:pointer;float:right}.workflower .workflower-label{margin:20px 0 6px;font-size:12px;font-family:sans-serif;color:#697690;cursor:default}.workflower .workflower-label .workflower-picture{display:none;width:50px;height:50px;-webkit-border-radius:50%;border-radius:50%;background-color:rgba(0,0,0,.06);background-image:url(\"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDUwIDUwIiBoZWlnaHQ9IjUwcHgiIGlkPSJMYXllcl8xIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA1MCA1MCIgd2lkdGg9IjUwcHgiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxjaXJjbGUgY3g9IjI1IiBjeT0iMjUiIGZpbGw9Im5vbmUiIHI9IjI0IiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2Utd2lkdGg9IjIiLz48cmVjdCBmaWxsPSJub25lIiBoZWlnaHQ9IjUwIiB3aWR0aD0iNTAiLz48cGF0aCBkPSJNMjkuOTMzLDM1LjUyOGMtMC4xNDYtMS42MTItMC4wOS0yLjczNy0wLjA5LTQuMjFjMC43My0wLjM4MywyLjAzOC0yLjgyNSwyLjI1OS00Ljg4OGMwLjU3NC0wLjA0NywxLjQ3OS0wLjYwNywxLjc0NC0yLjgxOCAgYzAuMTQzLTEuMTg3LTAuNDI1LTEuODU1LTAuNzcxLTIuMDY1YzAuOTM0LTIuODA5LDIuODc0LTExLjQ5OS0zLjU4OC0xMi4zOTdjLTAuNjY1LTEuMTY4LTIuMzY4LTEuNzU5LTQuNTgxLTEuNzU5ICBjLTguODU0LDAuMTYzLTkuOTIyLDYuNjg2LTcuOTgxLDE0LjE1NmMtMC4zNDUsMC4yMS0wLjkxMywwLjg3OC0wLjc3MSwyLjA2NWMwLjI2NiwyLjIxMSwxLjE3LDIuNzcxLDEuNzQ0LDIuODE4ICBjMC4yMiwyLjA2MiwxLjU4LDQuNTA1LDIuMzEyLDQuODg4YzAsMS40NzMsMC4wNTUsMi41OTgtMC4wOTEsNC4yMWMtMS4yNjEsMy4zOS03LjczNywzLjY1NS0xMS40NzMsNi45MjQgIGMzLjkwNiwzLjkzMywxMC4yMzYsNi43NDYsMTYuOTE2LDYuNzQ2czE0LjUzMi01LjI3NCwxNS44MzktNi43MTNDMzcuNjg4LDM5LjE4NiwzMS4xOTcsMzguOTMsMjkuOTMzLDM1LjUyOHoiLz48L3N2Zz4=\");-o-background-size:cover;background-size:cover;text-align:center;margin:auto;overflow:hidden;opacity:.1}.workflower .workflower-label .workflower-picture img{max-width:100%}.workflower .workflower-label h4{text-align:center;margin:5px}.workflower .workflower-label h4:empty:before{content:\"\\672A\\547D\\540D\\8282\\70B9\";opacity:.5}.workflower .type-0 .workflower-point,.workflower [data-id^=startevent] .workflower-point{background-color:green}.workflower .type-0 .workflower-point:after,.workflower [data-id^=startevent] .workflower-point:after{content:\"\";display:block;width:35%;height:50%;position:absolute;left:50%;top:50%;margin:-8px 0 0 -4px;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);-o-transform:rotate(45deg);transform:rotate(45deg);border:2px solid transparent;border-right-color:#fff;border-bottom-color:#fff}.workflower .workflower-point{background-color:#ccc;width:24px;height:24px;-webkit-border-radius:50%;border-radius:50%;margin:auto;position:relative}.workflower .workflower-point.selected{background-color:#ffe63f}.workflower .workflower-point.status-0{background-color:green}.workflower .workflower-point.status-0:after{content:\"\";display:block;width:35%;height:50%;position:absolute;left:50%;top:50%;margin:-8px 0 0 -4px;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);-o-transform:rotate(45deg);transform:rotate(45deg);border:2px solid transparent;border-right-color:#fff;border-bottom-color:#fff}.workflower .workflower-point.status-1{background-color:#2f86d5}.workflower .workflower-point.status-2{background-color:#ccc}.workflower .workflower-point.status-3{background-color:red}.workflower .workflower-point.status-3:after{content:\"X\";display:-webkit-box;display:-webkit-flex;display:-moz-box;display:-ms-flexbox;display:flex;position:absolute;left:0;top:0;right:0;bottom:0;text-align:center;-webkit-box-pack:center;-webkit-justify-content:center;-moz-box-pack:center;-ms-flex-pack:center;justify-content:center;-webkit-align-content:center;-ms-flex-line-pack:center;align-content:center;color:#fff;font-size:16px}", ""]);
 
 // exports
 
