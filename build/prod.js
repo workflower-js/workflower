@@ -35,7 +35,7 @@ const prod = {
         NODE_ENV: JSON.stringify("production")
       }
     }),
-    new UglifyJSPlugin()
+    // new UglifyJSPlugin()
   ]
 }
 
