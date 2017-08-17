@@ -3,11 +3,8 @@ import './main.scss'
 import Watch from './components/watch'
 import Node from './components/node'
 import Curve from './components/curve'
-<<<<<<< HEAD
 import axios from 'axios'
 axios.defaults.headers.post['Content-Type'] = 'application/json; charset=utf-8';
-=======
->>>>>>> cafc537c36698c6e08bb9dd500f4b8b3ae4ddbbf
 
 class Workflow extends Watch {
 
@@ -25,9 +22,10 @@ class Workflow extends Watch {
       gapLength: 40,
       nodes: [],
       padding: '10px',
-      getNodeAttributes: (nodeData) => { return '' },
+      getNodeAttributes: (nodeData)=>{ return '' },
+      
 
-      ... options
+      ...options
     }
 
     this.cache = {}
@@ -103,7 +101,6 @@ class Workflow extends Watch {
    */
   initNodes() {
 
-<<<<<<< HEAD
   	var nodes =this.options.nodes
   	nodes.forEach(data => {
 	      let node = this.createNode(data)
@@ -127,37 +124,12 @@ class Workflow extends Watch {
 	      }
 	    })
 	    
-=======
-    var nodes = this.options.nodes
-
-    nodes.forEach(data => {
-      let node = this.createNode(data)
-
-      this.cache.data = this.cache.data || {}
-      this.cache.data[data.id] = data
-
-      if (node) {
-        this.nodes[data.id] = node
-        node.renderTo(this.$board)
-      }
-    })
-
-    nodes.forEach(data => {
-
-      let node = this.resolveNode(data.id)
-
-      if (node) {
-        node.updateStatus(data.taskUserList.length > 0 ? data.taskUserList[0].taskStatus : '')
-      }
-    })
->>>>>>> cafc537c36698c6e08bb9dd500f4b8b3ae4ddbbf
   }
 
   /**
    * 点击事件
    */
   delegateEvents() {
-<<<<<<< HEAD
   	//数据模板
 		let dataTemplate={
 		  "endEvent": {},
@@ -186,9 +158,6 @@ class Workflow extends Watch {
   		
 
     this.on('resize', ()=>{
-=======
-    this.on('resize', () => {
->>>>>>> cafc537c36698c6e08bb9dd500f4b8b3ae4ddbbf
       this.updateCanvasSize()
     })
     //点击隐藏
@@ -234,10 +203,6 @@ class Workflow extends Watch {
            * @emits {click} 全局点击事件，传入事件函数的参数：event, clickedComponentType == 'node', componentData = nodeData
            */
           this.emit('click', event, 'node', node)
-<<<<<<< HEAD
-=======
-          this.emit('contextmenu', event, node)
->>>>>>> cafc537c36698c6e08bb9dd500f4b8b3ae4ddbbf
           break
         } else {
           target = target.parentNode
@@ -251,11 +216,14 @@ class Workflow extends Watch {
         if (target.classList && target.classList.contains('workflower-node')) {
           let nodeId = target.getAttribute('data-id')
           let node = this.nodes[nodeId]
-<<<<<<< HEAD
-          
+
           this.emit('contextmenu',event,node, target)
           this.emit('rightClick',event,node,target)
           
+					let currentId = node.$element.id.slice(5);
+					let nextNodeId;
+					let prevNodeId;
+					
           //右键行为
 					this.menu(event,"menu",node)
 					
@@ -263,37 +231,34 @@ class Workflow extends Watch {
 					document.getElementById("addNode").onclick = ()=>{
 						clickCount++
 						
-					this.addNode(node,this.options.nodes,clickCount)
+						this.addNode(node,this.options.nodes,clickCount,currentId,prevNodeId,nextNodeId)
 					}
 					//添加同级分支
 					document.getElementById("addBranch").onclick = ()=> {
 						clickCount++
 						
-						this.addBranch(node,this.options.nodes,clickCount)
+						this.addBranch(node,this.options.nodes,clickCount,currentId,prevNodeId,nextNodeId)
 					}
 					//删除元素
 					document.getElementById("deleteNode").onclick= ()=> {
-						this.deleteNode(node,this.options.nodes,clickCount,i)
+						this.deleteNode(node,this.options.nodes,clickCount,i,currentId,prevNodeId,nextNodeId)
 					}
 					//修改属性
 					document.getElementById("modifyAttr").onclick= ()=> {
-						event.stopPropagation();
+						
 						this.emit('modifyAttr', node, this.options.nodes, dataTemplate)
-						this.modifyAttr(node, this.options.nodes, dataTemplate)
-						this.createData(dataTemplate)	
+						this.modifyAttr(node, this.options.nodes, dataTemplate,currentId,prevNodeId,nextNodeId)
+						this.createData(dataTemplate,currentId,prevNodeId,nextNodeId)	
 					}
 					
 					//设置审批人
 					document.getElementById("setAssign").onclick = ()=> {
-						event.stopPropagation();
+						
 						this.emit("setAssign", node, this.options.nodes, dataTemplate)
-						this.setAssign(node,this.options.nodes,dataTemplate)
-						this.createData(dataTemplate)	
+						this.setAssign(node,this.options.nodes,dataTemplate,currentId,prevNodeId,nextNodeId)
+						this.createData(dataTemplate,currentId,prevNodeId,nextNodeId)	
 					}
 					      		
-=======
-          this.emit('rightClick', event, node, target)
->>>>>>> cafc537c36698c6e08bb9dd500f4b8b3ae4ddbbf
           break
         } else {
           target = target.parentNode
@@ -304,7 +269,6 @@ class Workflow extends Watch {
       
     })
 
-<<<<<<< HEAD
     
   }
 	addUser () {
@@ -342,7 +306,7 @@ class Workflow extends Watch {
 
 	}
 //制作数据模板
-	createData(dataTemplate){
+	createData(dataTemplate,currentId,prevNodeId,nextNodeId){
 		
 		
 		this.options.nodes.forEach((value,index)=> {
@@ -419,8 +383,8 @@ class Workflow extends Watch {
 			})		
 	}
 	//初始化命名
-	formateNodeName(node,jsonData){
-		let currentId = node.$element.id.slice(5);
+	formateNodeName(node,jsonData,currentId,prevNodeId,nextNodeId){
+		
 		let children=node.$element.children[0].children[1];
 		jsonData.forEach((value,index)=>{
 			if(value.id == currentId){
@@ -432,8 +396,8 @@ class Workflow extends Watch {
 		})
 	}
 	//修改属性
-	modifyAttr(node,jsonData,dataTemplate) {
-		let currentId = node.$element.id.slice(5);
+	modifyAttr(node,jsonData,dataTemplate,currentId,prevNodeId,nextNodeId) {
+	
 		
 		let children=node.$element.children[0].children[1];
 		var textList=document.querySelector('#textlist');
@@ -447,8 +411,8 @@ class Workflow extends Watch {
 		this.remove('#nodeNameContainer', "#nodeName", 1,document.getElementById( "nodeNameContainer" ).children.length-1)
 
 			jsonData.forEach((value,index)=>{
-				if(value.id==currentId){
-
+				if(value.id == currentId){
+					
 					document.getElementById("nodeName").value = value.name || value.id
 					children.innerHTML = value.name || value.id
 				}
@@ -467,7 +431,7 @@ class Workflow extends Watch {
 
 							dataTemplate.usertaskList.forEach((value1,index1)=>{
 								
-								if(value1.id==currentId){
+								if(value1.id == currentId){
 									
 										if(nodeName == ""){
 											alert("请输入内容")
@@ -490,38 +454,81 @@ class Workflow extends Watch {
 				
 		}
 		this.menuHide()
+		dataTemplate.flowList.forEach((value,index)=>{
+			if(value.sourceRef == "editable02" && value.targetRef == "endevent1" && "editable02".targetRef != "endevent1"){
+				dataTemplate.flowList.splice(index,1)
+			}
+		})
+
 	} 
 	//设置审批人
-	setAssign (node,jsonData,dataTemplate) {
-		let currentId = node.$element.id.slice(5);
+	setAssign (node,jsonData,dataTemplate,currentId,prevNodeId,nextNodeId) {
+		
 		var dialogForm=document.querySelector('#dialog-form');
+		//获取checked的value
+		let radio=document.getElementsByName("radio");
+	
+	  let selectvalue=null;   //  selectvalue为radio中选中的值
+	
+	 	for(var i=0;i<radio.length;i++){
+	
+	        if(radio[i].checked==true) {
+	
+             selectvalue=radio[i].value;
+
+             break;
+	       }
+		}
 
 		//回填审批人
 		setTimeout(function(){
 			let assigneeDatas;
 			
 			dataTemplate.usertaskList.forEach((value,index)=>{
-				console.log(value.assignee)
-				console.log(value.assignee.length)
+				//回填radio
+				if(value.id == currentId){
+					
+					if(value.charInfo.condition == "${nrOfInstances-nrOfCompletedInstances==0}"){
+						
+						selectvalue = "many"
+					}else if(value.charInfo.condition == "${nrOfInstances-nrOfCompletedInstances==(nrOfInstances-1)}"){
+						
+						selectvalue = "one"
+					}else{
+
+						selectvalue = "onlyone"
+
+					}
+					//将selectvalue的值转换为选中的radio
+				 	for(var i=0;i<radio.length;i++){
+				
+				        if(selectvalue == radio[i].value) {
+				
+			             radio[i].checked = true
+			
+			             break;
+				       }
+					}					
+				}
+				
 				if(value.assignee.length == 0){
 					assigneeDatas = jsonData
 				}else{
 					assigneeDatas = dataTemplate.usertaskList
 				}
 			})
-			console.log(jsonData)
-			console.log(dataTemplate.usertaskList)
-			console.log(assigneeDatas)
+			
+			//将jsonData数据添加到dataTemplate
 			jsonData.forEach((value,index)=>{
 				dataTemplate.usertaskList.forEach((value1,index1)=>{
 					if(value1.id == value.id){
-						console.log(value.id)
+
 						if(value.taskUserList && value.taskUserList.length > 0 ){
 							if(value.taskUserList[0].assigneeUsers && value.taskUserList[0].assigneeUsers.length > 0){
-								console.log(1)
+
 								value1.assignee = value.taskUserList[0].assigneeUsers								
 							}else if(value.taskUserList[0].assignee != ""){
-								console.log(2)
+
 								value1.assignee.push(value.taskUserList[0].assignee)
 							}
 						}
@@ -531,9 +538,7 @@ class Workflow extends Watch {
 			})
 			assigneeDatas.forEach((value,index)=>{
 				if(value.id == currentId){
-					console.log(currentId)
-					console.log(value.id)
-					console.log(value.taskUserList)
+
 					let assignerData = []
 					let assignerDataEdit = []
 					
@@ -545,6 +550,7 @@ class Workflow extends Watch {
 						}	
 					}
 						assignerData = value.assignee || assignerDataEdit
+						//去重
 					 let data = [];
 					 let json1 = {};
 					 for(var i = 0; i < assignerData.length; i++){
@@ -554,7 +560,7 @@ class Workflow extends Watch {
 					  }
 					 }
 					 assignerData = data
-					console.log(assignerData)
+					
 					
 					$(".select2-selection__rendered").empty(); 
 					assignerData.forEach((value2,index2)=>{
@@ -568,7 +574,9 @@ class Workflow extends Watch {
 								inputTemplate.title = json.data.userName
 								
 								inputTemplate.innerHTML = `<span class="select2-selection__choice__remove" role="presentation">×</span>${json.data.userName}`
-								document.getElementsByClassName("select2-selection__rendered")[0].appendChild(inputTemplate)								
+								document.getElementsByClassName("select2-selection__rendered")[0].appendChild(inputTemplate)	
+								document.getElementById("assigneeName").value=json.data.userName
+								
 						})							
 						}
 
@@ -578,9 +586,9 @@ class Workflow extends Watch {
 			})			
 		},1)
 		
-	setTimeout(function(){		
-					$("#assigneeName").val(null).trigger("change");
-},2)
+		setTimeout(function(){		
+			$("#assigneeName").val(null).trigger("change");
+		},2)
 		//设置委托人时的保存
 		document.getElementById("save3").onclick=()=>{
 			
@@ -603,20 +611,6 @@ class Workflow extends Watch {
 														value1.assignee.push(assigneeName);	
 													}else if(liLength >= 2){
 														
-													//获取checked的value
-			              			let radio=document.getElementsByName("radio");
-						
-						              let selectvalue=null;   //  selectvalue为radio中选中的值
-						
-						             	for(var i=0;i<radio.length;i++){
-						
-						                    if(radio[i].checked==true) {
-						
-						                             selectvalue=radio[i].value;
-						
-						                             break;
-						                   }
-						            	}
 
 														Array.prototype.slice.call(document.getElementsByClassName("select2-selection__rendered")[0].children).forEach((value,index)=>{
 															if(value.title != ""){
@@ -647,19 +641,34 @@ class Workflow extends Watch {
 																				  }
 																				 }
 																				value1.assignee = res
-																				
-																				//选中一人通过姐通过
-													             	if(selectvalue == "one"){
+																				for(var i=0;i<radio.length;i++){
+	
+																			        if(radio[i].checked==true) {
+																			
+																		             selectvalue=radio[i].value;
+																		
+																		             break;
+																			       }
+																				}
+																				console.log(value1)
+																				console.log(selectvalue)
+
+																				//全部通过才通过
+													             	if(selectvalue == "many"){
 													             		value1.charInfo.condition =  value1.charInfo.completionCondition = "${nrOfInstances-nrOfCompletedInstances==0}"
 
 													             		value1.charInfo.inputDataItem = "${assigneeList}"
-													             		//全部通过才通过
-													             	}else{
+													             		//一人通过即通过
+													             	}else if(selectvalue == "one"){
 													             		
 													             		value1.charInfo.condition = value1.charInfo.completionCondition = "${nrOfInstances-nrOfCompletedInstances==(nrOfInstances-1)}"
 													             	
 													             		value1.charInfo.inputDataItem = "${assigneeList}"
+													             	}else{
+													             		value1.charInfo.condition = value1.charInfo.completionCondition = ""
+													             		value1.charInfo.sequential = "true"
 													             	}
+													             	
 														        	}
 														        })
 														    })
@@ -679,19 +688,14 @@ class Workflow extends Watch {
 				
 				})		
 		}
-			console.log(jsonData)
-			console.log(dataTemplate.usertaskList)
+
 	}
 	
-=======
-  }
-
->>>>>>> cafc537c36698c6e08bb9dd500f4b8b3ae4ddbbf
   watchNodeOffset() {
     Object.keys(this.nodes).forEach(id => {
       let node = this.nodes[id]
 
-      node.on('layoutChange', (prop, old, val) => {
+      node.on('layoutChange', (prop, old, val)=>{
 
         this.updateCureveOfNode(node)
 
@@ -701,14 +705,7 @@ class Workflow extends Watch {
   }
 
   createNode(data) {
-<<<<<<< HEAD
     let node = this.nodes[data.id] || new Node(data)
-=======
-    let node
-
-    node = this.nodes[data.id] || new Node(data)
-
->>>>>>> cafc537c36698c6e08bb9dd500f4b8b3ae4ddbbf
     return node
   }
 
@@ -793,11 +790,11 @@ class Workflow extends Watch {
     sourceNodes.forEach(source => {
       let curveId = source.id + '->' + node.id
       let curve = this.lines[curveId]
-
-      if (curve) {
-        curve.endX = point.left
-        curve.endY = point.top
-      }
+			
+			if (curve) {
+	      curve.endX = point.left
+	      curve.endY = point.top
+	    }
     })
 
     // 更新出口的连接线
@@ -805,10 +802,10 @@ class Workflow extends Watch {
       let curveId = node.id + '->' + target.id
       let curve = this.lines[curveId]
 
-      if (curve) {
-        curve.startX = point.left
-        curve.startY = point.top
-      }
+			if (curve) {
+	      curve.startX = point.left
+	      curve.startY = point.top
+			}
     })
   }
 
@@ -816,15 +813,15 @@ class Workflow extends Watch {
    * 连线
    */
   drawCurves(nodes) {
-
+  	
     nodes = nodes || this.getRootNodes()
 
     if (nodes && nodes instanceof Array) {
       nodes.forEach(node => {
         let sourceOffset = node.getPoint()
         let targets = this.getTargetNodes(node)
-
-        sourceOffset.left += sourceOffset.width / 2
+				
+        sourceOffset.left += sourceOffset.width/2
 
         targets.forEach(target => {
           let targetOffset = target.getPoint()
@@ -975,21 +972,12 @@ class Workflow extends Watch {
    */
   appendNode(nodeOptions) {
     let node = nodeOptions instanceof Node ? nodeOptions : this.createNode(nodeOptions)
-<<<<<<< HEAD
-
-		
 		//this.cache.data[node.id] = nodeOptions
-=======
-    console.log(node)
-
-    //this.cache.data[node.id] = nodeOptions
->>>>>>> cafc537c36698c6e08bb9dd500f4b8b3ae4ddbbf
     if (!this.nodes[node.id]) {
       this.nodes[node.id] = node
       this.$board.appendChild(node.$element)
     }
   }
-<<<<<<< HEAD
   
 	
   
@@ -997,36 +985,30 @@ class Workflow extends Watch {
   menu(event,menu,node){
     event.preventDefault();
 
-    	//节点集合不需要同级分支
-    	if(this.nodes[node.$element.id.slice(5)].data.elementType == 3){
-    		document.getElementById("menu").children[2].style.display="none"
-    		document.getElementById("menu").children[0].style.display="none"
-    		document.getElementById("menu").children[3].style.display="none"
-    		document.getElementById("menu").children[4].style.display="none"
-			}else{
-    		document.getElementById("menu").children[2].style.display="block"
-    		document.getElementById("menu").children[0].style.display="block"			
-    		document.getElementById("menu").children[3].style.display="block"
-    		document.getElementById("menu").children[4].style.display="block"
+    	//网关只需要有增加下级节点
+    	document.getElementById("menu").children[2].style.display = (this.nodes[node.$element.id.slice(5)].data.elementType == 3) ? "none" : "block"
+    	document.getElementById("menu").children[0].style.display = (this.nodes[node.$element.id.slice(5)].data.elementType == 3) ? "none" : "block"
+    	document.getElementById("menu").children[3].style.display = (this.nodes[node.$element.id.slice(5)].data.elementType == 3) ? "none" : "block"
+    	document.getElementById("menu").children[4].style.display = (this.nodes[node.$element.id.slice(5)].data.elementType == 3) ? "none" : "block"
+    	//若不是网关，但outgoing为两个的话或该节点是开始节点和结束节点，都不能直接删除该节点
+			if(this.nodes[node.$element.id.slice(5)].data.elementType != 3 && this.nodes[node.$element.id.slice(5)].data.outgoing.length >= 2 || this.nodes[node.$element.id.slice(5)].data.id == "startevent1" || this.nodes[node.$element.id.slice(5)].data.id == "endevent1"){
+				document.getElementById("menu").children[0].style.display = "none"
 			}
 
-			var x=(event.pageX-260)+'px';
-	　　	var y=(event.pageY-288)+'px';
-			var menu=document.querySelector('#menu');
-	　　	menu.style.left=x;
-	　　	menu.style.top=y;
-	　　	menu.style.width=130+'px';		
+			let x = (event.pageX - 260) + 'px';
+	　　	let y = (event.pageY - 288) + 'px';
+			var menu = document.querySelector('#menu');
+	　　	menu.style.left = x;
+	　　	menu.style.top = y;
+	　　	menu.style.width = 130 + 'px';		
 			menu.style.display = 'block';
 			
   }
 
  	//添加具体元素
-  addNode(node,jsonData,clickCount){
+  addNode(node,jsonData,clickCount,currentId,prevNodeId,nextNodeId){
   		
 			let i=0;
-			let currentId= node.$element.id.slice(5);
-			let nextNodeId;
-			let prevNodeId;
 			jsonData.forEach((value,index)=>{
 				value.incoming.forEach((value1,index)=>{
 					if(value1.sourceRef == currentId){
@@ -1113,119 +1095,30 @@ class Workflow extends Watch {
 			
 			this.appendNode(data)
 			jsonData.splice(i+1,0,data)			
-
+			console.log(jsonData)
 			this.refresh()	
 			this.menuHide()
  			
-=======
-
-  //右键菜单
-  menu(event, menu) {
-    event.preventDefault();
-    var x = event.clientX + 'px';
-    var y = event.clientY + 'px';
-    var menu = document.querySelector('#menu');
-    menu.style.left = x;
-    menu.style.top = y;
-    menu.style.width = 130 + 'px';
-    menu.style.display = 'block'
   }
-
-  //添加具体元素
-  addNode(node, jsonData, clickCount) {
-
-    let i = 0;
-    let currentId = node.$element.id.slice(5);
-    var nextNodeId = node.$element.nextElementSibling.id.slice(5);
-
-    jsonData.forEach((value, index) => {
-
-      if (value.id == currentId) {
-        i = index
-        nextNodeId = value.outgoing[0].targetRef
-        value.outgoing[0].targetRef = "editable" + clickCount
-
-        jsonData.forEach((value, index) => {
-          if (value.id == nextNodeId) {
-            value.incoming[0].sourceRef = "editable" + clickCount
-          }
-        })
-      }
-    })
-
-    const data = {
-
-      "taskUserList": [{
-        "taskId": "",
-        "formKey": "",
-        "businessKey": "",
-        "assignee": "",
-        "taskKey": "editable" + clickCount,
-        "endTime": null,
-        "taskName": "editable" + clickCount,
-        "variables": null,
-        "startTime": null,
-        "activitiId": "",
-        "businessTitle": "",
-        "taskStatus": "2",
-        "processInstanceId": "",
-        "companyId": "",
-        "comment": ""
-      }],
-      "id": "editable" + clickCount,
-      "incoming": [{
-        "id": "flow" + (clickCount + 7),
-        "targetRef": "editable" + clickCount,
-        "sourceRef": currentId
-      }],
-      "processInstanceId": "",
-      "businessKey": "",
-      "outgoing": [{
-        "id": "flow" + (clickCount + 8),
-        "targetRef": nextNodeId,
-        "sourceRef": "editable" + clickCount
-      }],
-      "elementType": "1",
-      "procDefId": ""
-
-    }
-
-    this.appendNode(data)
-
-    jsonData.splice(i + 1, 0, data)
-    console.log(jsonData)
-    this.refresh()
-
->>>>>>> cafc537c36698c6e08bb9dd500f4b8b3ae4ddbbf
-  }
-
   //删除节点
-<<<<<<< HEAD
-  deleteNode(node,jsonData,clickCount,i){
+  deleteNode(node,jsonData,clickCount,i,currentId,prevNodeId,nextNodeId){
 
-			
-			let currentId = node.$element.id.slice(5);
-			
-			let nextNodeId;
-			let prevNodeId;
 			let currentNode = node.$element;
 			
 			jsonData.forEach((value,index)=> {
 
 				if(value.id==currentId){
-					
 					i = index;
 					//前节点ID
 					prevNodeId=value.incoming[0].sourceRef;
 					//后节点ID
 					nextNodeId=value.outgoing[0].targetRef;
-
-					
+					//判断是删除下级节点还是同级分支
 					if(nextNodeId.indexOf("0") == -1){
-						this.deleteUnderlingNode(jsonData,prevNodeId,currentId,nextNodeId)
+						//删除下级节点
+						this.deleteUnderlingNode(jsonData,currentId,prevNodeId,nextNodeId)
 					}else{
-
-
+						//删除同级分支
 					jsonData.forEach((value,index)=> {
 						//对后节点进行修改
 						if(value.id==nextNodeId){	
@@ -1244,20 +1137,22 @@ class Workflow extends Watch {
 								if(value.id.indexOf("0")!=-1){
 									jsonData.forEach((value7,index7)=>{
 										if(value.id==value7.id){
-											
-											
+
 											jsonData.forEach((value,index)=>{
-												if(value.id==value7.incoming[0].sourceRef){
-													
-													
-													value.outgoing[0].targetRef=value7.outgoing[0].targetRef
+												//修改前方节点的outgoing
+												if(value.id == value7.incoming[0].sourceRef){
+														value.outgoing = value7.outgoing
+														value.outgoing .forEach((value,index)=>{
+															value.sourceRef = value7.incoming[0].sourceRef
+														})
 
 												}
-												if(value.id==value7.outgoing[0].targetRef){
-
-													value.incoming[0].sourceRef=value7.incoming[0].sourceRef
-
-												}
+												//修改后方节点的incoming
+												value7.outgoing.forEach((value8,index8)=>{
+													if(value.id == value8.targetRef){
+														value.incoming[0].sourceRef = value7.incoming[0].sourceRef
+													}
+												})
 												
 											})
 
@@ -1325,13 +1220,12 @@ class Workflow extends Watch {
 			}
 		})
 		jsonData.splice(i,1)
-		console.log(jsonData)
-  		this.refresh()
-  		this.menuHide()
+		this.refresh()
+		this.menuHide()
   }
 
 	//删除下级节点
-	deleteUnderlingNode(jsonData,prevNodeId,currentId,nextNodeId){
+	deleteUnderlingNode(jsonData,currentId,prevNodeId,nextNodeId){
 		jsonData.forEach((value,index)=> {
 			if(value.id==nextNodeId){
 				value.incoming[0].sourceRef=prevNodeId;
@@ -1351,13 +1245,9 @@ class Workflow extends Watch {
 		this.menuHide()
 	}
 	//添加分支
-	addBranch(node,jsonData,clickCount){
+	addBranch(node,jsonData,clickCount,currentId,prevNodeId,nextNodeId){
 
 			let i=0;
-			let currentId = node.$element.id.slice(5);
-			
-			let nextNodeId;
-			let prevNodeId;
 			let data={}//数据模板
 			let nodeGroup={}//节点集合
 			
@@ -1457,8 +1347,7 @@ class Workflow extends Watch {
 							
 							
 							
-							nodeGroup.outgoing=[{id:"flow"+(clickCount+27),sourceRef:"editable0"+clickCount,targetRef:nextNodeId}]
-							
+							nodeGroup.outgoing=[{id:"flow0"+(clickCount+27),sourceRef:"editable0"+clickCount,targetRef:nextNodeId}]
 							if(nextNodeId.indexOf("0")==-1){
 								
 								value.incoming=[{id:"flow"+(clickCount+70),sourceRef:"editable0"+clickCount,targetRef:nextNodeId}]	
@@ -1487,302 +1376,26 @@ class Workflow extends Watch {
 			if(nextNodeId.indexOf("0")==-1) {
 				jsonData.splice(i+1,0,nodeGroup)
 			}
-			console.log(jsonData)
+
 			this.refresh()
 			this.menuHide()
 	}
 	
-=======
-  deleteNode(node, jsonData, clickCount) {
-
-    let i = 0;
-    let currentId = node.$element.id.slice(5);
-
-    let nextNodeId;
-    let prevNodeId;
-    let currentNode = node.$element
-    let nextNode = node.$element.nextElementSibling
-    let prevNode = node.$element.previousElementSiblingSibling
-
-    jsonData.forEach((value, index) => {
-
-      if (value.id == currentId) {
-
-        i = index;
-        //前节点ID
-        prevNodeId = value.incoming[0].sourceRef;
-        //后节点ID
-        nextNodeId = value.outgoing[0].targetRef;
-        if (nextNodeId.indexOf("0") == -1) {
-          console.log("删除下级节点")
-          this.deleteUnderlingNode(jsonData, prevNodeId, currentId, nextNodeId)
-        } else {
-          console.log("删除同级分支")
-
-          jsonData.forEach((value, index) => {
-            //对后节点进行修改
-            if (value.id == nextNodeId) {
-              value.incoming.forEach((value6, index6) => {
-                if (value6.sourceRef == currentId) {
-                  value.incoming.splice(index6, 1)
-                }
-                if (value6.sourceRef == prevNodeId) {
-                  value.incoming.splice(index6, 1)
-                }
-              })
-
-              if (value.incoming.length == 0) {
-                value.incoming.push({id: "flow" + (clickCount + 9), sourceRef: prevNodeId, targetRef: nextNodeId})
-                value.incoming[0].sourceRef == prevNodeId
-
-              }
-            }
-            //对前节点进行修改
-            if (value.id == prevNodeId) {
-
-              value.outgoing.forEach((value1, index1) => {
-                //删除同级分支
-                if (value1.targetRef == currentId) {
-
-                  value.outgoing.splice(index1, 1)
-
-                  //当同级分支只剩下一个时,自动转换为下级节点
-                  if (value.outgoing.length == 2) {
-
-
-                    //当节点仅为一个时,就将节点集合删除
-                    if (nextNodeId.indexOf("0") != -1) {
-
-                    }
-
-                  } else if (value.outgoing.length == 1 && value.incoming.length == 0) {
-
-                    value.outgoing.push({id: "flow" + (clickCount + 10), sourceRef: prevNodeId, targetRef: nextNodeId})
-
-                  } else if (value.outgoing.length == 0) {
-                    value.outgoing.push({id: "flow" + (clickCount + 11), sourceRef: prevNodeId, targetRef: nextNodeId})
-                  }
-                }
-
-              })
-            }
-          })
-        }
-
-      }
-
-    })
-
-    this.nodes[nextNodeId].left = parseInt(currentNode.style.left)
-    this.nodes[nextNodeId].top = parseInt(currentNode.style.top)
-    jsonData.splice(i, 1)
-    this.refresh()
-  }
-
-  //删除下级节点
-  deleteUnderlingNode(jsonData, prevNodeId, currentId, nextNodeId) {
-    jsonData.forEach((value, index) => {
-      if (value.id == nextNodeId) {
-        value.incoming[0].sourceRef = prevNodeId;
-      }
-
-      if (value.id == prevNodeId) {
-        value.outgoing.forEach((value, index) => {
-
-          if (value.targetRef == currentId) {
-
-            value.targetRef = nextNodeId;
-          }
-        })
-      }
-
-    })
-  }
-
-  //添加分支
-  addBranch(node, jsonData, clickCount) {
-    let i = 0;
-    let currentId = node.$element.id.slice(5);
-
-    let nextNodeId;
-    let prevNodeId;
-    let data = {}//数据模板
-    let nodeGroup = {}//节点集合
-
-    let nodesArr = []
-
-    jsonData.forEach((value, index) => {
-
-      if (value.id == currentId) {
-
-        i = index
-        //前节点ID
-        prevNodeId = value.incoming[0].sourceRef
-        //后节点ID
-        nextNodeId = value.outgoing[0].targetRef
-
-        data = {
-
-          "taskUserList": [{
-            "taskId": "",
-            "formKey": "",
-            "businessKey": "",
-            "assignee": "",
-            "taskKey": "editable" + clickCount,
-            "endTime": null,
-            "taskName": "editable" + clickCount,
-            "variables": null,
-            "startTime": null,
-            "activitiId": "",
-            "businessTitle": "",
-            "taskStatus": "2",
-            "processInstanceId": "",
-            "companyId": "",
-            "comment": ""
-          }],
-          "id": "editable" + clickCount,
-          "incoming": [{
-            "id": "flow9",
-            "targetRef": "editable" + clickCount,
-            "sourceRef": prevNodeId
-          }],
-          "processInstanceId": "",
-          "businessKey": "",
-          "outgoing": [{
-            "id": "flow10",
-            "targetRef": "editable0" + clickCount,
-            "sourceRef": "editable" + clickCount
-          }],
-          "elementType": "1",
-          "procDefId": "",
-          "approver": ""
-
-        }
-        if (nextNodeId.indexOf("0") == -1) {
-          value.outgoing[0].targetRef = "editable0" + clickCount
-        } else {
-          jsonData.forEach((v) => {
-            if (v.id == nextNodeId) {
-
-              value.outgoing[0].targetRef = nextNodeId
-              data.outgoing[0].targetRef = nextNodeId
-
-            }
-          })
-
-        }
-
-        //遍历this.options.nodes
-        jsonData.forEach((value, index) => {
-
-          //设置后节点的incoming
-          if (value.id == nextNodeId) {
-
-            console.log(value)
-            console.log()
-            let incomingData = {
-              id: "flow" + clickCount,
-              sourceRef: "editable" + clickCount,
-              targetRef: "editable0" + clickCount
-            }
-
-            //深拷贝对象
-            nodeGroup = this.deepCopy(data)
-
-            nodeGroup.incoming = value.incoming;
-            nodeGroup.incoming.push(incomingData)
-
-            nodeGroup.taskUserList[0]["taskName"] = "节点集合0" + clickCount
-            nodeGroup.id = nodeGroup.taskUserList[0]["taskKey"] = "editable0" + clickCount;
-            nodeGroup.elementType = 4
-
-            nodeGroup.incoming.forEach((value) => {
-
-              value.targetRef = "editable0" + clickCount;
-            })
-
-            nodeGroup.outgoing = [{id: "flow10", sourceRef: "editable0" + clickCount, targetRef: nextNodeId}]
-
-            if (nextNodeId.indexOf("0") == -1) {
-              value.incoming = [{id: "flow" + clickCount, sourceRef: "editable0" + clickCount, targetRef: nextNodeId}]
-            }
-
-          }
-          //设置前节点的outgoing
-          if (value.id == prevNodeId) {
-
-            var outgoingData = {id: "flow" + clickCount, sourceRef: prevNodeId, targetRef: "editable" + clickCount}
-            value.outgoing.push(outgoingData)
-
-          }
-        })
-
-      }
-
-    })
-
-    jsonData.splice(i + 1, 0, data)
-    //如果后节点是网关不必再添加网关
-    if (nextNodeId.indexOf("0") == -1) {
-      jsonData.splice(i + 1, 0, nodeGroup)
-    }
-    console.log(nodeGroup)
-    console.log(jsonData)
-    this.refresh()
-  }
-
->>>>>>> cafc537c36698c6e08bb9dd500f4b8b3ae4ddbbf
   //刷新初始化
-  refresh() {
+	refresh() {
     this.initBoard()
     this.initNodes()
     this.layoutNodes()
     this.drawCurves()
     this.watchNodeOffset()
-<<<<<<< HEAD
 	}
 
 	//深拷贝
 	deepCopy(source){
-=======
-  }
-
-  //修改属性
-  modifyAttr(node, jsonData) {
-    let currentId = node.$element.id.slice(5);
-
-    var textList = document.querySelector('#textlist');
-
-    textList.style.display = 'block'
-
-    document.getElementById("confirm1").onclick = () => {
-      var inputText = document.getElementById("name").value
-      jsonData.forEach((value, index) => {
-        if (value.id == currentId) {
-          value.taskUserList.forEach((value, index) => {
-
-            if (confirm("是否要更改审批人")) {
-              value.assigneeName = inputText;
-            }
-            inputText = ""
-          })
-          inputText = ""
-        }
-
-      })
-
-      textList.style.display = 'none'
-    }
-  }
-
-  //深拷贝
-  deepCopy(source) {
->>>>>>> cafc537c36698c6e08bb9dd500f4b8b3ae4ddbbf
     var result;
     (source instanceof Array) ? (result = []) : (result = {});
-
+     
     for (var key in source) {
-<<<<<<< HEAD
         result[key] = (typeof source[key]==='object') ? this.deepCopy(source[key]) : source[key];
     }    
     return result;  
@@ -1837,12 +1450,6 @@ class Workflow extends Watch {
 
 	}
 	
-=======
-      result[key] = (typeof source[key] === 'object') ? this.deepCopy(source[key]) : source[key];
-    }
-    return result;
-  }
->>>>>>> cafc537c36698c6e08bb9dd500f4b8b3ae4ddbbf
 }
 
 module.exports = exports = Workflow
