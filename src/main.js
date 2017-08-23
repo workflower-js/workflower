@@ -91,6 +91,10 @@ class Workflow extends Watch {
    	<div class="buttonContainer"><button id="save3" class="ui-button" style="float:left">保存</button>
    	<button id="cancel3" class="ui-button" style="float:right">取消</button></div>
    	`
+    if (navigator.userAgent.match(/DingTalk/)) {
+      assigner.style.display = 'none'
+    }
+
     this.$element.appendChild(assigner)
     this.$element.appendChild(RightClickHtml)
     this.$element.appendChild(attrText)

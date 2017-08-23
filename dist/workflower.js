@@ -2994,24 +2994,22 @@ var Node = function (_Watch) {
   }, {
     key: 'format',
     value: function format() {
-      var taskName = void 0;
-      var taskStatus = void 0;
+      var taskName = '';
+      var taskStatus = 0;
+
       if (this.data.taskUserList != null) {
         if (this.data.taskUserList.length > 0) {
           var taskList = this.data.taskUserList;
 
           if (taskList && taskList.length > 0) {
+            taskList.forEach(function (task) {
+              var status = parseInt(task.taskStatus || '0');
 
-            if (taskList[0].taskName == "") {
-
-              taskName = this.data.name;
-            } else {
-              taskName = "";
-              taskStatus = "";
-            }
-          } else {
-            taskName = "";
-            taskStatus = "";
+              if (taskStatus <= status) {
+                taskName = task.assigneeName ? task.assigneeName + '<div style="font-weight: lighter; font-size: 12px; opacity:.6;">(' + task.taskName + ')</div>' : task.taskName;
+                taskStatus = status;
+              }
+            });
           }
         } else if (this.data.taskUserList.length == 0) {
           var dataArr = [];
@@ -3019,6 +3017,7 @@ var Node = function (_Watch) {
 
           taskName = dataArr[0];
           taskStatus = dataArr[1];
+
           if (this.data.id == "startevent1") {
             taskName = "开始";
             taskStatus = "1";
