@@ -3930,7 +3930,7 @@ module.exports = function spread(callback) {
 
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -3968,1460 +3968,1497 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 _axios2.default.defaults.headers.post['Content-Type'] = 'application/json; charset=utf-8';
 
 var Workflow = function (_Watch) {
-	_inherits(Workflow, _Watch);
+  _inherits(Workflow, _Watch);
 
-	/**
-  * @constructor
-  * @param options
-  */
-	function Workflow() {
-		var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  /**
+   * @constructor
+   * @param options
+   */
+  function Workflow() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-		_classCallCheck(this, Workflow);
+    _classCallCheck(this, Workflow);
 
-		var _this = _possibleConstructorReturn(this, (Workflow.__proto__ || Object.getPrototypeOf(Workflow)).call(this));
+    var _this = _possibleConstructorReturn(this, (Workflow.__proto__ || Object.getPrototypeOf(Workflow)).call(this));
 
-		_this.options = _extends({
-			element: null,
-			editable: true,
-			gapLength: 40,
-			nodes: [],
-			padding: '10px',
-			getNodeAttributes: function getNodeAttributes(nodeData) {
-				return '';
-			}
+    _this.options = _extends({
+      element: null,
+      editable: true,
+      gapLength: 40,
+      nodes: [],
+      padding: '10px',
+      getNodeAttributes: function getNodeAttributes(nodeData) {
+        return '';
+      }
 
-		}, options);
+    }, options);
 
-		_this.cache = {};
-		_this.nodes = {};
-		_this.lines = {};
+    _this.cache = {};
+    _this.nodes = {};
+    _this.lines = {};
 
-		if (_this.options.events) {
-			_this.on(_this.options.events);
-		}
+    if (_this.options.events) {
+      _this.on(_this.options.events);
+    }
 
-		_this.initBoard();
-		_this.delegateEvents();
-		_this.initNodes();
-		_this.layoutNodes();
-		_this.drawCurves();
-		_this.watchNodeOffset();
-		return _this;
-	}
+    _this.initBoard();
+    _this.delegateEvents();
+    _this.initNodes();
+    _this.layoutNodes();
+    _this.drawCurves();
+    _this.watchNodeOffset();
+    return _this;
+  }
 
-	/**
-  * 初始化画板
-  */
-
-
-	_createClass(Workflow, [{
-		key: 'initBoard',
-		value: function initBoard() {
-
-			var date = new Date().getTime();
-			var elem = this.options.element;
-			if (elem) {
-				elem.classList.add('workflower');
-				elem.innerHTML = '    \n        <div class="workflower">\n\n          <div class="workflower-board">\n            <svg class="workflower-paths"></svg>\n          </div>\n        </div>';
-
-				this.$element = elem;
-				this.$board = elem.getElementsByClassName('workflower-board')[0];
-				this.$paths = elem.getElementsByClassName('workflower-paths')[0];
-			}
-			//右键菜单
-			var RightClickHtml = document.createElement("div");
-			RightClickHtml.innerHTML = '<div id="menu">\n    \t<p id="deleteNode">\u5220\u9664\u8282\u70B9</p>\n    \t<p id="addNode">\u589E\u52A0\u4E0B\u7EA7\u8282\u70B9</p>\n    \t<p id="addBranch">\u589E\u52A0\u540C\u7EA7\u5206\u652F</p>\n    \t<p id="modifyAttr">\u4FEE\u6539\u5C5E\u6027</p>\n    \t<p id="setAssign">\u8BBE\u7F6E\u5BA1\u6279\u4EBA</p>\n    </div>';
-
-			var attrText = document.createElement("form");
-			attrText.id = "textlist";
-			attrText.innerHTML = '\n    \t<input type="text" name="nodeName" id="nodeName" placeholder="\u8BBE\u7F6E\u8282\u70B9\u540D\u79F0"/>\n    \t<a style="display: block;width: 100px;height: 40px;background: #ddd;line-height: 40px;text-align: center;margin: 20px auto;" id="confirm1">\u786E\u8BA4</a>';
-
-			var assigner = document.createElement("div");
-			assigner.id = 'dialog-form';
-
-			assigner.innerHTML = '<div><p class="assignText">\u6307\u5B9A\u5BA1\u6279\u4EBA</p></div>\n\n   \t<div class="buttonContainer"><button id="save3" class="ui-button" style="float:left">\u4FDD\u5B58</button>\n   \t<button id="cancel3" class="ui-button" style="float:right">\u53D6\u6D88</button></div>\n   \t';
-			this.$element.appendChild(assigner);
-			this.$element.appendChild(RightClickHtml);
-			this.$element.appendChild(attrText);
-		}
-
-		/**
-   * 初始化节点
+  /**
+   * 初始化画板
    */
 
-	}, {
-		key: 'initNodes',
-		value: function initNodes() {
-			var _this2 = this;
-
-			var nodes = this.options.nodes;
-			nodes.forEach(function (data) {
-				var node = _this2.createNode(data);
-
-				_this2.cache.data = _this2.cache.data || {};
-				_this2.cache.data[data.id] = data;
-
-				if (node) {
-					_this2.nodes[data.id] = node;
-					node.renderTo(_this2.$board);
-				}
-			});
-
-			nodes.forEach(function (data) {
-
-				var node = _this2.resolveNode(data.id);
-
-				if (node) {
-					node.updateStatus(data.taskUserList.length > 0 ? data.taskUserList[0].taskStatus : '');
-				}
-			});
-		}
-
-		/**
-   * 点击事件
-   */
-
-	}, {
-		key: 'delegateEvents',
-		value: function delegateEvents() {
-			var _this3 = this;
-
-			//数据模板
-			var dataTemplate = {
-				"endEvent": {},
-				"exclusiveGatewayList": [],
-				"flowList": [],
-				"parGateWayList": [],
-				"processId": "",
-				"processName": "",
-				"startEvent": {},
-				"usertaskList": []
-			};
-			var clickCount = 0;
-			var idArray = [];
-			var i = 0;
-
-			//获取已存在的clickout值，并取出其中最大值
-			this.options.nodes.forEach(function (value, index) {
-				idArray.push(value.id.replace(/[^0-9]/ig, ""));
-			});
-			Array.prototype.max = function () {
-				return Math.max.apply({}, this);
-			};
-			clickCount = idArray.max();
-
-			this.on('resize', function () {
-				_this3.updateCanvasSize();
-			});
-			//点击隐藏
-			document.getElementById(this.$element.id).onclick = function () {
-				_this3.menuHide();
-			};
-
-			if (document.getElementById("save")) {
-				//保存
-				document.getElementById("save").onclick = function () {
-
-					_this3.createData(dataTemplate);
-
-					_this3.sendData(dataTemplate, clickCount);
-				};
-			}
-
-			if (document.getElementById("save2")) {
-				//编辑
-				document.getElementById("save2").onclick = function () {
-
-					_this3.createData(dataTemplate);
-					_this3.sendData(dataTemplate, clickCount);
-				};
-			}
-
-			this.$element.addEventListener('click', function (event) {
-				var target = event.target;
-
-				while (target) {
-					if (target.classList && target.classList.contains('workflower-node')) {
-						var nodeId = target.getAttribute('data-id');
-						var node = _this3.nodes[nodeId];
-
-						/**
-       * @emits {click} 节点点击事件，传入事件函数的参数：event, clickedComponentType == 'node', componentData = nodeData
-       */
-						_this3.emit('onNodeClick', event, node);
-
-						/**
-       * @emits {click} 全局点击事件，传入事件函数的参数：event, clickedComponentType == 'node', componentData = nodeData
-       */
-						_this3.emit('click', event, 'node', node);
-						break;
-					} else {
-						target = target.parentNode;
-					}
-				}
-			});
-			//右键
-			this.$element.addEventListener('contextmenu', function (event) {
-				var target = event.target;
-				while (target) {
-					if (target.classList && target.classList.contains('workflower-node')) {
-						var _ret = function () {
-							var nodeId = target.getAttribute('data-id');
-							var node = _this3.nodes[nodeId];
-
-							_this3.emit('contextmenu', event, node, target);
-							_this3.emit('rightClick', event, node, target);
-
-							var currentId = node.$element.id.slice(5);
-							var nextNodeId = void 0;
-							var prevNodeId = void 0;
-
-							//右键行为
-							_this3.menu(event, "menu", node);
-
-							//添加下级节点
-							document.getElementById("addNode").onclick = function () {
-								clickCount++;
-
-								_this3.addNode(node, _this3.options.nodes, clickCount, currentId, prevNodeId, nextNodeId);
-							};
-							//添加同级分支
-							document.getElementById("addBranch").onclick = function () {
-								clickCount++;
-
-								_this3.addBranch(node, _this3.options.nodes, clickCount, currentId, prevNodeId, nextNodeId);
-							};
-							//删除元素
-							document.getElementById("deleteNode").onclick = function () {
-								_this3.deleteNode(node, _this3.options.nodes, clickCount, i, currentId, prevNodeId, nextNodeId);
-							};
-							//修改属性
-							document.getElementById("modifyAttr").onclick = function () {
-
-								_this3.emit('modifyAttr', node, _this3.options.nodes, dataTemplate);
-								_this3.modifyAttr(node, _this3.options.nodes, dataTemplate, currentId, prevNodeId, nextNodeId);
-								_this3.createData(dataTemplate, currentId, prevNodeId, nextNodeId);
-							};
-
-							//设置审批人
-							document.getElementById("setAssign").onclick = function () {
-
-								_this3.emit("setAssign", node, _this3.options.nodes, dataTemplate);
-								_this3.setAssign(node, _this3.options.nodes, dataTemplate, currentId, prevNodeId, nextNodeId);
-								_this3.createData(dataTemplate, currentId, prevNodeId, nextNodeId);
-							};
-
-							return 'break';
-						}();
-
-						if (_ret === 'break') break;
-					} else {
-						target = target.parentNode;
-					}
-				}
-			});
-		}
-	}, {
-		key: 'addUser',
-		value: function addUser() {
-			var list = document.querySelector("#list");
-			var listNode = document.createElement("select");
-			list.style.display = 'block';
-			var select = list.getElementsByTagName("select");
-
-			if (select.length <= 0) {
-
-				_axios2.default.get('/userRole/queryAuthUsers').then(function (res) {
-
-					var userData = res.data.data;
-
-					userData.forEach(function (value, index) {
-
-						listNode.innerHTML += '<option value =' + value.userName + '>' + value.userName + '</option>';
-
-						document.getElementById("list").appendChild(listNode);
-					});
-				}).catch(function (err) {});
-			}
-		}
-		//制作数据模板
-
-	}, {
-		key: 'createData',
-		value: function createData(dataTemplate, currentId, prevNodeId, nextNodeId) {
-			var _this4 = this;
-
-			this.options.nodes.forEach(function (value, index) {
-
-				value.incoming.forEach(function (value, index) {
-
-					dataTemplate.flowList.push(value);
-				});
-				value.outgoing.forEach(function (value, index) {
-
-					dataTemplate.flowList.push(value);
-				});
-				_this4.unique(dataTemplate.flowList);
-
-				if (value.elementType == 0) {
-					dataTemplate.startEvent.id = value.id;
-				} else if (value.elementType == 2) {
-					dataTemplate.endEvent.id = value.id;
-				} else if (value.elementType == 3) {
-					dataTemplate.exclusiveGatewayList.push({ "id": value.id, "name": value.id });
-					_this4.unique1(dataTemplate.exclusiveGatewayList);
-				} else {
-
-					dataTemplate.usertaskList.push({
-						"assignee": [],
-						"charInfo": { "condition": "", "userTaskId": "", "completionCondition": "", "elementVariable": "assignee", "sequential": "false", "inputDataItem": "" },
-						"id": value.id,
-						"name": value.name || value.id
-
-					});
-				}
-				_this4.unique1(dataTemplate.usertaskList);
-			});
-
-			var workflowerName = document.getElementById("workflowerName").value;
-			var key = new Date().getTime();
-			if (localStorage.getItem('wfkey')) {
-				dataTemplate.businessKey = localStorage.getItem('wfkey');
-			} else {
-				dataTemplate.businessKey = key;
-			}
-
-			if (workflowerName == "") {
-				dataTemplate.processId = localStorage.getItem('wfkey') || this.$element.id;
-				dataTemplate.processName = this.$element.id;
-			} else {
-				dataTemplate.processId = localStorage.getItem('wfkey') || "wf" + key;
-				dataTemplate.processName = workflowerName;
-			}
-			console.log(dataTemplate);
-			return dataTemplate;
-		}
-		//sendData
-
-	}, {
-		key: 'sendData',
-		value: function sendData(dataTemplate, clickCount) {
-
-			dataTemplate.flowList.forEach(function (value, index) {
-				console.log(value.targetRef);
-				if (value.targetRef == "endevent1" && value.sourceRef == "editable1") {
-					dataTemplate.flowList.splice(index, 1);
-				}
-			});
-
-			_axios2.default.post('/bpmn/produceBpmnJson', dataTemplate).then(function (res) {
-				if (res.data.status == 200) {
-					alert('保存成功');
-					window.history.go(-1);
-				} else {
-					alert('保存失败');
-				}
-			});
-		}
-		//初始化命名
-
-	}, {
-		key: 'formateNodeName',
-		value: function formateNodeName(node, jsonData, currentId, prevNodeId, nextNodeId) {
-
-			var children = node.$element.children[0].children[1];
-			jsonData.forEach(function (value, index) {
-				if (value.id == currentId) {
-
-					document.getElementById("nodeName").value = value.name || value.id;
-					children.innerHTML = value.name || value.id;
-				}
-			});
-		}
-		//修改属性
-
-	}, {
-		key: 'modifyAttr',
-		value: function modifyAttr(node, jsonData, dataTemplate, currentId, prevNodeId, nextNodeId) {
-
-			var children = node.$element.children[0].children[1];
-			var textList = document.querySelector('#textlist');
-
-			//回填功能
-			var num = currentId.replace(/[^0-9]/ig, "");
-			num -= 1;
-
-			document.getElementById("nodeNameContainer").appendChild(document.getElementById("nodeName"));
-
-			this.remove('#nodeNameContainer', "#nodeName", 1, document.getElementById("nodeNameContainer").children.length - 1);
-
-			jsonData.forEach(function (value, index) {
-				if (value.id == currentId) {
-
-					document.getElementById("nodeName").value = value.name || value.id;
-					children.innerHTML = value.name || value.id;
-				}
-			});
-
-			//点击保存按钮
-			document.getElementById("confirm1").onclick = function () {
-
-				var nodeName = document.getElementById("nodeName").value;
-
-				jsonData.forEach(function (value, index) {
-					if (value.id == currentId) {
-
-						dataTemplate.usertaskList.forEach(function (value1, index1) {
-
-							if (value1.id == currentId) {
-
-								if (nodeName == "") {
-									alert("请输入内容");
-								} else {
-
-									value.name = nodeName;
-									children.innerHTML = nodeName;
-									value1.name = nodeName;
-								}
-							}
-						});
-					}
-				});
-			};
-			this.menuHide();
-			dataTemplate.flowList.forEach(function (value, index) {
-				if (value.sourceRef == "editable02" && value.targetRef == "endevent1" && "editable02".targetRef != "endevent1") {
-					dataTemplate.flowList.splice(index, 1);
-				}
-			});
-		}
-		//设置审批人
-
-	}, {
-		key: 'setAssign',
-		value: function setAssign(node, jsonData, dataTemplate, currentId, prevNodeId, nextNodeId) {
-
-			var dialogForm = document.querySelector('#dialog-form');
-			//获取checked的value
-			var radio = document.getElementsByName("radio");
-
-			var selectvalue = null; //  selectvalue为radio中选中的值
-
-			for (var i = 0; i < radio.length; i++) {
-
-				if (radio[i].checked == true) {
-
-					selectvalue = radio[i].value;
-
-					break;
-				}
-			}
-
-			//回填审批人
-			setTimeout(function () {
-				var assigneeDatas = void 0;
-
-				dataTemplate.usertaskList.forEach(function (value, index) {
-					//回填radio
-					if (value.id == currentId) {
-
-						if (value.charInfo.condition == "${nrOfInstances-nrOfCompletedInstances==0}") {
-
-							selectvalue = "many";
-						} else if (value.charInfo.condition == "${nrOfInstances-nrOfCompletedInstances==(nrOfInstances-1)}") {
-
-							selectvalue = "one";
-						} else {
-
-							selectvalue = "onlyone";
-						}
-						//将selectvalue的值转换为选中的radio
-						for (var i = 0; i < radio.length; i++) {
-
-							if (selectvalue == radio[i].value) {
-
-								radio[i].checked = true;
-
-								break;
-							}
-						}
-					}
-
-					if (value.assignee.length == 0) {
-						assigneeDatas = jsonData;
-					} else {
-						assigneeDatas = dataTemplate.usertaskList;
-					}
-				});
-
-				//将jsonData数据添加到dataTemplate
-				jsonData.forEach(function (value, index) {
-					dataTemplate.usertaskList.forEach(function (value1, index1) {
-						if (value1.id == value.id) {
-
-							if (value.taskUserList && value.taskUserList.length > 0) {
-								if (value.taskUserList[0].assigneeUsers && value.taskUserList[0].assigneeUsers.length > 0) {
-
-									value1.assignee = value.taskUserList[0].assigneeUsers;
-								} else if (value.taskUserList[0].assignee != "") {
-
-									value1.assignee.push(value.taskUserList[0].assignee);
-								}
-							}
-						}
-					});
-				});
-				assigneeDatas.forEach(function (value, index) {
-					if (value.id == currentId) {
-
-						var assignerData = [];
-						var assignerDataEdit = [];
-
-						if (value.taskUserList && value.taskUserList.length > 0) {
-							if (!value.taskUserList[0].assigneeUsers || value.taskUserList[0].assigneeUsers.length == 0) {
-								assignerDataEdit.push(value.taskUserList[0].assignee);
-							} else {
-								assignerDataEdit = value.taskUserList[0].assigneeUsers;
-							}
-						}
-						assignerData = value.assignee || assignerDataEdit;
-						//去重
-						var data = [];
-						var json1 = {};
-						for (var i = 0; i < assignerData.length; i++) {
-							if (!json1[assignerData[i]]) {
-								data.push(assignerData[i]);
-								json1[assignerData[i]] = 1;
-							}
-						}
-						assignerData = data;
-
-						$(".select2-selection__rendered").empty();
-						assignerData.forEach(function (value2, index2) {
-
-							document.getElementsByClassName("select2-selection__rendered")[0].innerHTML = "";
-							if (value2 != []) {
-								$.get('/userCenter/getUserDetailInfo?id=' + value2, function (json) {
-
-									var inputTemplate = document.createElement("li");
-									inputTemplate.className = "select2-selection__choice";
-									inputTemplate.title = json.data.userName;
-
-									inputTemplate.innerHTML = '<span class="select2-selection__choice__remove" role="presentation">\xD7</span>' + json.data.userName;
-									document.getElementsByClassName("select2-selection__rendered")[0].appendChild(inputTemplate);
-									document.getElementById("assigneeName").value = json.data.userName;
-								});
-							}
-						});
-					}
-				});
-			}, 1);
-
-			setTimeout(function () {
-				$("#assigneeName").val(null).trigger("change");
-			}, 2);
-			//设置委托人时的保存
-			document.getElementById("save3").onclick = function () {
-
-				var assigneeName = document.getElementById("assigneeName").value;
-
-				jsonData.forEach(function (value, index) {
-					if (value.id == currentId) {
-
-						dataTemplate.usertaskList.forEach(function (value1, index1) {
-
-							if (value1.id == currentId) {
-
-								if (assigneeName == "") {
-									alert("请输入内容");
-								} else {
-
-									var liLength = Array.prototype.slice.call(document.getElementsByClassName("select2-selection__rendered")[0].children).length;
-
-									if (liLength == 1) {
-										value1.assignee.push(assigneeName);
-									} else if (liLength >= 2) {
-
-										Array.prototype.slice.call(document.getElementsByClassName("select2-selection__rendered")[0].children).forEach(function (value, index) {
-											if (value.title != "") {
-												//获取用户
-												$.get('/userRole/queryAuthUsers', function (json) {
-
-													json.data.forEach(function (value2, index2) {
-														if (value2.userName == value.title) {
-															//通过用户ID获取用户详细信息，并将其回填到输入框中
-															$.get('/userCenter/getUserDetailInfo?id=' + value2.id, function (data) {
-																var inputTemplate = document.createElement("li");
-																inputTemplate.className = "select2-selection__choice";
-																inputTemplate.title = json.data.userName;
-
-																inputTemplate.innerHTML = '<span class="select2-selection__choice__remove" role="presentation">\xD7</span>' + json.data.userName;
-																document.getElementsByClassName("select2-selection__rendered")[0].appendChild(inputTemplate);
-															});
-
-															//去重
-															value1.assignee.push(value2.id);
-
-															var res = [];
-															var json = {};
-															for (var i = 0; i < value1.assignee.length; i++) {
-																if (!json[value1.assignee[i]]) {
-																	res.push(value1.assignee[i]);
-																	json[value1.assignee[i]] = 1;
-																}
-															}
-															value1.assignee = res;
-															for (var i = 0; i < radio.length; i++) {
-
-																if (radio[i].checked == true) {
-
-																	selectvalue = radio[i].value;
-
-																	break;
-																}
-															}
-															console.log(value1);
-															console.log(selectvalue);
-
-															//全部通过才通过
-															if (selectvalue == "many") {
-																value1.charInfo.condition = value1.charInfo.completionCondition = "${nrOfInstances-nrOfCompletedInstances==0}";
-
-																value1.charInfo.inputDataItem = "${assigneeList}";
-																//一人通过即通过
-															} else if (selectvalue == "one") {
-
-																value1.charInfo.condition = value1.charInfo.completionCondition = "${nrOfInstances-nrOfCompletedInstances==(nrOfInstances-1)}";
-
-																value1.charInfo.inputDataItem = "${assigneeList}";
-															} else {
-																value1.charInfo.condition = value1.charInfo.completionCondition = "";
-																value1.charInfo.sequential = "true";
-															}
-														}
-													});
-												});
-											}
-										});
-									}
-								}
-							}
-						});
-					}
-				});
-			};
-		}
-	}, {
-		key: 'watchNodeOffset',
-		value: function watchNodeOffset() {
-			var _this5 = this;
-
-			Object.keys(this.nodes).forEach(function (id) {
-				var node = _this5.nodes[id];
-
-				node.on('layoutChange', function (prop, old, val) {
-
-					_this5.updateCureveOfNode(node);
-
-					_this5.emit('resize');
-				});
-			});
-		}
-	}, {
-		key: 'createNode',
-		value: function createNode(data) {
-			var node = this.nodes[data.id] || new _node2.default(data);
-			return node;
-		}
-
-		/**
-   * 把 node id 转成 Node 实例
-   * @param {String|Node} id
-   * @returns {Node}
-   */
-
-	}, {
-		key: 'resolveNode',
-		value: function resolveNode(id) {
-			return typeof id === 'string' ? this.nodes[id] : id;
-		}
-
-		/**
-   * 把 数据 id 转成 Data 实例
-   * @param {String|Node} id
-   * @returns {Node}
-   */
-
-	}, {
-		key: 'resolveData',
-		value: function resolveData(id) {
-			return typeof id === 'string' ? this.cache.data[id] : id;
-		}
-
-		/**
-   * 节点排列
-   */
-
-	}, {
-		key: 'layoutNodes',
-		value: function layoutNodes(nodes) {
-			var _this6 = this;
-
-			var startY = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-			var startX = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-			var padding = parseInt(this.options.padding);
-			var topCount = startY;
-			var top = startY;
-			var left = startX + padding;
-			var bottom = startY + padding;
-			var leftOfNextLevel = void 0;
-			var topOfNextLevel = void 0;
-
-			nodes = nodes || this.getRootNodes();
-			if (nodes && nodes instanceof Array) {
-				var currentLevelTop = top;
-
-				nodes.forEach(function (node) {
-					var targets = _this6.getTargetNodes(node);
-
-					topOfNextLevel = top;
-					leftOfNextLevel = left + parseInt(node.width);
-
-					if (targets.length > 0) {
-						var childArea = _this6.layoutNodes(targets, top, leftOfNextLevel);
-						var sup_top = childArea.top + (childArea.bottom - childArea.top) / 2;
-
-						node.top = sup_top;
-					} else {
-						node.top = top;
-					}
-
-					node.left = Math.max(node.left, left);
-
-					topCount = topOfNextLevel;
-					top += padding + parseInt(node.height);
-				});
-			}
-
-			this.emit('resize');
-
-			return {
-				top: startY,
-				bottom: top,
-				left: startX,
-				right: left + leftOfNextLevel,
-				children: nodes.length
-				// childrenGap:
-			};
-		}
-
-		/**
-   * 更新节点的连接线
-   * @param {Node} node
-   */
-
-	}, {
-		key: 'updateCureveOfNode',
-		value: function updateCureveOfNode(node) {
-			var _this7 = this;
-
-			var sourceNodes = this.getSourceNodes(node);
-			var targetNodes = this.getTargetNodes(node);
-			var point = node.getPoint();
-
-			// 更新入口的连接线
-			sourceNodes.forEach(function (source) {
-				var curveId = source.id + '->' + node.id;
-				var curve = _this7.lines[curveId];
-
-				if (curve) {
-					curve.endX = point.left;
-					curve.endY = point.top;
-				}
-			});
-
-			// 更新出口的连接线
-			targetNodes.forEach(function (target) {
-				var curveId = node.id + '->' + target.id;
-				var curve = _this7.lines[curveId];
-
-				if (curve) {
-					curve.startX = point.left;
-					curve.startY = point.top;
-				}
-			});
-		}
-
-		/**
-   * 连线
-   */
-
-	}, {
-		key: 'drawCurves',
-		value: function drawCurves(nodes) {
-			var _this8 = this;
-
-			nodes = nodes || this.getRootNodes();
-
-			if (nodes && nodes instanceof Array) {
-				nodes.forEach(function (node) {
-					var sourceOffset = node.getPoint();
-					var targets = _this8.getTargetNodes(node);
-
-					sourceOffset.left += sourceOffset.width / 2;
-
-					targets.forEach(function (target) {
-						var targetOffset = target.getPoint();
-						targetOffset.left -= 4;
-						var curve = new _curve2.default(sourceOffset, targetOffset);
-						var path = curve.draw();
-						var curveId = node.id + '->' + target.id;
-
-						curve.id = curveId;
-						_this8.lines[curveId] = curve;
-						_this8.$paths.appendChild(path);
-					});
-
-					_this8.drawCurves(targets);
-				});
-			}
-		}
-
-		/**
-   * 获取根节点
-   */
-
-	}, {
-		key: 'getRootNodes',
-		value: function getRootNodes() {
-			var _this9 = this;
-
-			var cache = this.cache[Workflow.ROOTS];
-
-			if (cache) {
-				return cache;
-			} else {
-				var roots = [];
-
-				Object.keys(this.nodes).forEach(function (id) {
-					var node = _this9.nodes[id];
-
-					if (parseInt(node.data.elementType) === 0) {
-						roots.push(node);
-					}
-				});
-
-				return this.cache[Workflow.ROOTS] = roots;
-			}
-		}
-
-		/**
-   * 获取来源节点
-   * @param {String|Node} id
-   * @returns {Array<Node>}
-   */
-
-	}, {
-		key: 'getSourceNodes',
-		value: function getSourceNodes(id) {
-			var _this10 = this;
-
-			var node = this.resolveNode(id);
-			var list = node.data.incoming || [];
-			var result = [];
-
-			list.forEach(function (source) {
-				var node = _this10.nodes[source.sourceRef];
-
-				if (node) {
-					result.push(node);
-				}
-			});
-
-			return result;
-		}
-
-		/**
-   * 获取来源数据
-   * @param {String} id
-   * @returns {Array}
-   */
-
-	}, {
-		key: 'getSourceData',
-		value: function getSourceData(id) {
-			var _this11 = this;
-
-			var data = this.resolveData(id);
-			var list = data.incoming || [];
-			var result = [];
-
-			list.forEach(function (source) {
-				var data = _this11.cache.data[source.sourceRef];
-
-				if (data) {
-					result.push(data);
-				}
-			});
-
-			return result;
-		}
-
-		/**
-   * 获取目标节点
-   * @param {String|Node} id
-   * @returns {Array<Node>}
-   */
-
-	}, {
-		key: 'getTargetNodes',
-		value: function getTargetNodes(id) {
-			var _this12 = this;
-
-			var node = this.resolveNode(id);
-			var list = node.data.outgoing || [];
-			var result = [];
-
-			list.forEach(function (target) {
-				var node = _this12.nodes[target.targetRef];
-
-				if (node) {
-					result.push(node);
-				}
-			});
-
-			return result;
-		}
-
-		/**
-   * 获取目标数据
-   * @param {String} id
-   * @returns {Array}
-   */
-
-	}, {
-		key: 'getTargetData',
-		value: function getTargetData(id) {
-			var _this13 = this;
-
-			var data = this.resolveData(id);
-			var list = data.outgoing || [];
-			var result = [];
-
-			list.forEach(function (target) {
-				var data = _this13.cache.data[target.targetRef];
-
-				if (data) {
-					result.push(data);
-				}
-			});
-
-			return result;
-		}
-
-		/**
-   * 更新画板尺寸大小
-   */
-
-	}, {
-		key: 'updateCanvasSize',
-		value: function updateCanvasSize() {
-			var _this14 = this;
-
-			var x = 0;
-			var y = 0;
-
-			Object.keys(this.nodes).forEach(function (id) {
-				var node = _this14.nodes[id];
-				var point = node.getPoint();
-
-				x = Math.max(x, point.right);
-				y = Math.max(y, point.bottom);
-			});
-
-			this.$board.style.width = x + 'px';
-			this.$board.style.height = y + 'px';
-		}
-
-		/**
-   * 新增节点
-   * @param nodeOptions
-   */
-
-	}, {
-		key: 'appendNode',
-		value: function appendNode(nodeOptions) {
-			var node = nodeOptions instanceof _node2.default ? nodeOptions : this.createNode(nodeOptions);
-			//this.cache.data[node.id] = nodeOptions
-			if (!this.nodes[node.id]) {
-				this.nodes[node.id] = node;
-				this.$board.appendChild(node.$element);
-			}
-		}
-
-		//右键菜单
-
-	}, {
-		key: 'menu',
-		value: function menu(event, menu, node) {
-			event.preventDefault();
-
-			//网关只需要有增加下级节点
-			document.getElementById("menu").children[2].style.display = this.nodes[node.$element.id.slice(5)].data.elementType == 3 ? "none" : "block";
-			document.getElementById("menu").children[0].style.display = this.nodes[node.$element.id.slice(5)].data.elementType == 3 ? "none" : "block";
-			document.getElementById("menu").children[3].style.display = this.nodes[node.$element.id.slice(5)].data.elementType == 3 ? "none" : "block";
-			document.getElementById("menu").children[4].style.display = this.nodes[node.$element.id.slice(5)].data.elementType == 3 ? "none" : "block";
-			//若不是网关，但outgoing为两个的话或该节点是开始节点和结束节点，都不能直接删除该节点
-			if (this.nodes[node.$element.id.slice(5)].data.elementType != 3 && this.nodes[node.$element.id.slice(5)].data.outgoing.length >= 2 || this.nodes[node.$element.id.slice(5)].data.id == "startevent1" || this.nodes[node.$element.id.slice(5)].data.id == "endevent1") {
-				document.getElementById("menu").children[0].style.display = "none";
-			}
-
-			var x = event.pageX - 260 + 'px';
-			var y = event.pageY - 288 + 'px';
-			var menu = document.querySelector('#menu');
-			menu.style.left = x;
-			menu.style.top = y;
-			menu.style.width = 130 + 'px';
-			menu.style.display = 'block';
-		}
-
-		//添加具体元素
-
-	}, {
-		key: 'addNode',
-		value: function addNode(node, jsonData, clickCount, currentId, prevNodeId, nextNodeId) {
-
-			var i = 0;
-			jsonData.forEach(function (value, index) {
-				value.incoming.forEach(function (value1, index) {
-					if (value1.sourceRef == currentId) {
-
-						nextNodeId = value.id;
-					}
-				});
-				value.outgoing.forEach(function (value1, index) {
-					if (value1.targetRef == currentId) {
-						prevNodeId = value.id;
-					}
-				});
-			});
-
-			jsonData.forEach(function (value, index) {
-
-				if (value.id == currentId) {
-
-					i = index;
-					nextNodeId = value.outgoing[0].targetRef;
-					value.outgoing[0].targetRef = "editable" + clickCount;
-
-					jsonData.forEach(function (value, index) {
-						if (value.id == nextNodeId) {
-
-							value.incoming.forEach(function (value1, index) {
-
-								if (value1.sourceRef == currentId) {
-									if (value1.targetRef == nextNodeId) {
-										value.incoming[index] = { "id": "flow" + (clickCount + 40), "sourceRef": "editable" + clickCount, "targetRef": nextNodeId };
-									} else {
-										value.incoming[index] = { "id": "flow" + (clickCount + 40), "sourceRef": "editable" + clickCount, "targetRef": "editable0" + clickCount };
-									}
-								}
-							});
-						}
-					});
-				}
-			});
-
-			var data = {
-
-				"taskUserList": [{
-					"taskId": "",
-					"formKey": "",
-					"businessKey": "",
-					"assignee": "",
-					"taskKey": "editable" + clickCount,
-					"endTime": null,
-					"taskName": "editable" + clickCount,
-					"variables": null,
-					"startTime": null,
-					"activitiId": "",
-					"businessTitle": "",
-					"taskStatus": "2",
-					"processInstanceId": "",
-					"companyId": "",
-					"comment": ""
-				}],
-				"id": "editable" + clickCount,
-				"incoming": [{
-					"id": "flow" + (clickCount + 50),
-					"targetRef": "editable" + clickCount,
-					"sourceRef": currentId
-				}],
-				"processInstanceId": "",
-				"businessKey": "",
-				"outgoing": [{
-					"id": "flow" + (clickCount + 8),
-					"targetRef": nextNodeId,
-					"sourceRef": "editable" + clickCount
-				}],
-				"elementType": "1",
-				"procDefId": ""
-
-			};
-
-			this.appendNode(data);
-			jsonData.splice(i + 1, 0, data);
-			console.log(jsonData);
-			this.refresh();
-			this.menuHide();
-		}
-		//删除节点
-
-	}, {
-		key: 'deleteNode',
-		value: function deleteNode(node, jsonData, clickCount, i, currentId, prevNodeId, nextNodeId) {
-			var _this15 = this;
-
-			var currentNode = node.$element;
-
-			jsonData.forEach(function (value, index) {
-
-				if (value.id == currentId) {
-					i = index;
-					//前节点ID
-					prevNodeId = value.incoming[0].sourceRef;
-					//后节点ID
-					nextNodeId = value.outgoing[0].targetRef;
-					//判断是删除下级节点还是同级分支
-					if (nextNodeId.indexOf("0") == -1) {
-						//删除下级节点
-						_this15.deleteUnderlingNode(jsonData, currentId, prevNodeId, nextNodeId);
-					} else {
-						//删除同级分支
-						jsonData.forEach(function (value, index) {
-							//对后节点进行修改
-							if (value.id == nextNodeId) {
-								value.incoming.forEach(function (value6, index6) {
-									if (value6.sourceRef == currentId) {
-										value.incoming.splice(index6, 1);
-									}
-									if (value6.sourceRef == prevNodeId) {
-										value.incoming.splice(index6, 1);
-									}
-								});
-
-								//当节点仅为一个时,就将节点集合删除
-								if (value.incoming.length == 1) {
-
-									if (value.id.indexOf("0") != -1) {
-										jsonData.forEach(function (value7, index7) {
-											if (value.id == value7.id) {
-
-												jsonData.forEach(function (value, index) {
-													//修改前方节点的outgoing
-													if (value.id == value7.incoming[0].sourceRef) {
-														value.outgoing = value7.outgoing;
-														value.outgoing.forEach(function (value, index) {
-															value.sourceRef = value7.incoming[0].sourceRef;
-														});
-													}
-													//修改后方节点的incoming
-													value7.outgoing.forEach(function (value8, index8) {
-														if (value.id == value8.targetRef) {
-															value.incoming[0].sourceRef = value7.incoming[0].sourceRef;
-														}
-													});
-												});
-
-												jsonData.splice(index7, 1);
-											}
-										});
-									}
-								}
-								if (value.incoming.length == 0) {
-									value.incoming.push({ id: "flow" + (clickCount + 9), sourceRef: prevNodeId, targetRef: nextNodeId });
-									value.incoming[0].sourceRef == prevNodeId;
-								}
-							}
-							//对前节点进行修改
-							if (value.id == prevNodeId) {
-
-								value.outgoing.forEach(function (value1, index1) {
-
-									if (localStorage.getItem('title') == "新建") {
-										if (value1.id == "flow18") {
-											value.outgoing.splice(index1, 1);
-										}
-									}
-
-									//删除同级分支
-									if (value1.targetRef == currentId) {
-
-										value.outgoing.splice(index1, 1);
-										//当同级分支只剩下一个时,自动转换为下级节点
-										if (value.outgoing.length == 2) {} else if (value.outgoing.length == 1 && value.incoming.length == 0) {
-											document.getElementById("menu").children[0].style.display = "block";
-											//非开头节点
-										} else if (value.outgoing.length == 1 && value.incoming.length != 0) {} else if (value.outgoing.length == 0) {
-
-											value.outgoing.push({ id: "flow" + (clickCount + 11), sourceRef: prevNodeId, targetRef: nextNodeId });
-
-											document.getElementById("menu").children[0].style.display = "block";
-										}
-									}
-								});
-							}
-						});
-					}
-				}
-			});
-
-			this.nodes[nextNodeId].left = parseInt(currentNode.style.left);
-			this.nodes[nextNodeId].top = parseInt(currentNode.style.top);
-
-			jsonData.forEach(function (value, index) {
-				if (value.id == currentId) {
-					i = index;
-				}
-			});
-			jsonData.splice(i, 1);
-			this.refresh();
-			this.menuHide();
-		}
-
-		//删除下级节点
-
-	}, {
-		key: 'deleteUnderlingNode',
-		value: function deleteUnderlingNode(jsonData, currentId, prevNodeId, nextNodeId) {
-			jsonData.forEach(function (value, index) {
-				if (value.id == nextNodeId) {
-					value.incoming[0].sourceRef = prevNodeId;
-				}
-
-				if (value.id == prevNodeId) {
-					value.outgoing.forEach(function (value, index) {
-
-						if (value.targetRef == currentId) {
-
-							value.targetRef = nextNodeId;
-						}
-					});
-				}
-			});
-			this.menuHide();
-		}
-		//添加分支
-
-	}, {
-		key: 'addBranch',
-		value: function addBranch(node, jsonData, clickCount, currentId, prevNodeId, nextNodeId) {
-			var _this16 = this;
-
-			var i = 0;
-			var data = {}; //数据模板
-			var nodeGroup = {}; //节点集合
-
-			var nodesArr = [];
-
-			jsonData.forEach(function (value, index) {
-
-				if (value.id == currentId) {
-
-					i = index;
-					//前节点ID
-					prevNodeId = value.incoming[0].sourceRef;
-					//后节点ID
-					nextNodeId = value.outgoing[0].targetRef;
-
-					data = {
-
-						"taskUserList": [{
-							"taskId": "",
-							"formKey": "",
-							"businessKey": "",
-							"assignee": "",
-							"taskKey": "editable" + clickCount,
-							"endTime": null,
-							"taskName": "editable" + clickCount,
-							"variables": null,
-							"startTime": null,
-							"activitiId": "",
-							"businessTitle": "",
-							"taskStatus": "2",
-							"processInstanceId": "",
-							"companyId": "",
-							"comment": ""
-						}],
-						"id": "editable" + clickCount,
-						"incoming": [{
-							"id": "flow" + (clickCount + 60),
-							"targetRef": "editable" + clickCount,
-							"sourceRef": prevNodeId
-						}],
-						"processInstanceId": "",
-						"businessKey": "",
-						"outgoing": [{
-							"id": "flow" + (clickCount + 61),
-							"targetRef": "editable0" + clickCount,
-							"sourceRef": "editable" + clickCount
-						}],
-						"elementType": "1",
-						"procDefId": "",
-						"approver": ""
-
-					};
-					if (nextNodeId.indexOf("0") == -1) {
-						value.outgoing[0].targetRef = "editable0" + clickCount;
-					} else {
-						jsonData.forEach(function (v) {
-							if (v.id == nextNodeId) {
-
-								value.outgoing[0].targetRef = nextNodeId;
-								data.outgoing[0].targetRef = nextNodeId;
-							}
-						});
-					}
-
-					//遍历this.options.nodes
-					jsonData.forEach(function (value, index) {
-
-						//设置后节点的incoming
-						if (value.id == nextNodeId) {
-
-							var incomingData = { id: "flow" + (clickCount + 74), sourceRef: "editable" + clickCount, targetRef: "editable0" + clickCount };
-
-							//深拷贝对象
-							nodeGroup = _this16.deepCopy(data);
-
-							nodeGroup.incoming = value.incoming;
-
-							nodeGroup.incoming.push(incomingData);
-
-							nodeGroup.taskUserList[0]["taskName"] = "节点集合0" + clickCount;
-							nodeGroup.id = nodeGroup.taskUserList[0]["taskKey"] = "editable0" + clickCount;
-							nodeGroup.elementType = 3;
-
-							nodeGroup.incoming.forEach(function (value) {
-								if (nextNodeId.indexOf("0") != -1) {
-									value.targetRef = nextNodeId;
-								} else {
-									value.targetRef = "editable0" + clickCount;
-								}
-							});
-
-							nodeGroup.outgoing = [{ id: "flow0" + (clickCount + 27), sourceRef: "editable0" + clickCount, targetRef: nextNodeId }];
-							if (nextNodeId.indexOf("0") == -1) {
-
-								value.incoming = [{ id: "flow" + (clickCount + 70), sourceRef: "editable0" + clickCount, targetRef: nextNodeId }];
-							}
-						}
-						//设置前节点的outgoing
-						if (value.id == prevNodeId) {
-
-							var outgoingData = { id: "flow" + (clickCount + 29), sourceRef: prevNodeId, targetRef: "editable" + clickCount };
-							value.outgoing.push(outgoingData);
-						}
-					});
-				}
-			});
-
-			jsonData.splice(i + 1, 0, data);
-			//如果后节点是网关不必再添加网关
-			if (nextNodeId.indexOf("0") == -1) {
-				jsonData.splice(i + 1, 0, nodeGroup);
-			}
-
-			this.refresh();
-			this.menuHide();
-		}
-
-		//刷新初始化
-
-	}, {
-		key: 'refresh',
-		value: function refresh() {
-			this.initBoard();
-			this.initNodes();
-			this.layoutNodes();
-			this.drawCurves();
-			this.watchNodeOffset();
-		}
-
-		//深拷贝
-
-	}, {
-		key: 'deepCopy',
-		value: function deepCopy(source) {
-			var result;
-			source instanceof Array ? result = [] : result = {};
-
-			for (var key in source) {
-				result[key] = _typeof(source[key]) === 'object' ? this.deepCopy(source[key]) : source[key];
-			}
-			return result;
-		}
-		//隐藏右键菜单
-
-	}, {
-		key: 'menuHide',
-		value: function menuHide() {
-			var menu = document.querySelector('#menu');
-			menu.style.display = 'none';
-		}
-	}, {
-		key: 'unique',
-		value: function unique(arr) {
-			//去重
-			for (var i = 0; i < arr.length; i++) {
-
-				for (var j = i + 1; j < arr.length; j++) {
-					if (arr[i].sourceRef == arr[j].sourceRef && arr[i].targetRef == arr[j].targetRef) {
-						arr.splice(j, 1);
-					}
-				}
-			}
-		}
-	}, {
-		key: 'unique1',
-		value: function unique1(arr) {
-			//去重
-			for (var i = 0; i < arr.length; i++) {
-
-				for (var j = i + 1; j < arr.length; j++) {
-					if (arr[i].id == arr[j].id) {
-
-						arr.splice(j, 1);
-					}
-				}
-			}
-		}
-		//删除父元素下的子元素
-
-	}, {
-		key: 'remove',
-		value: function remove(oparent, ochild, start, offset) {
-			var parent = document.querySelector(oparent),
-			    // 获取父级元素
-
-			children = parent.querySelectorAll(ochild),
-			    // 获取子级元素
-			len = children.length,
-			    // 子元素的长度        
-			start = start || 0,
-			    // 开始的位置
-			offset = offset ? start + offset : len; // 删除的数量，offset大于0，如果offset存在的话，那么开始位置加上位移，否则就是元素的长度剩余的长度；
-
-			if (len <= start) return;
-			for (var i = start; i < offset; i++) {
-				parent.removeChild(children[i]);
-			}
-		}
-	}]);
-
-	return Workflow;
+
+  _createClass(Workflow, [{
+    key: 'initBoard',
+    value: function initBoard() {
+
+      var date = new Date().getTime();
+      var elem = this.options.element;
+      if (elem) {
+        elem.classList.add('workflower');
+        elem.innerHTML = '    \n        <div class="workflower">\n\n          <div class="workflower-board">\n            <svg class="workflower-paths"></svg>\n          </div>\n        </div>';
+
+        this.$element = elem;
+        this.$board = elem.getElementsByClassName('workflower-board')[0];
+        this.$paths = elem.getElementsByClassName('workflower-paths')[0];
+      }
+      //右键菜单
+      var RightClickHtml = document.createElement("div");
+      RightClickHtml.innerHTML = '<div id="menu">\n    \t<p id="deleteNode">\u5220\u9664\u8282\u70B9</p>\n    \t<p id="addNode">\u589E\u52A0\u4E0B\u7EA7\u8282\u70B9</p>\n    \t<p id="addBranch">\u589E\u52A0\u540C\u7EA7\u5206\u652F</p>\n    \t<p id="modifyAttr">\u4FEE\u6539\u5C5E\u6027</p>\n    \t<p id="setAssign">\u8BBE\u7F6E\u5BA1\u6279\u4EBA</p>\n    </div>';
+
+      var attrText = document.createElement("form");
+      attrText.id = "textlist";
+      attrText.innerHTML = '\n    \t<input type="text" name="nodeName" id="nodeName" placeholder="\u8BBE\u7F6E\u8282\u70B9\u540D\u79F0"/>\n    \t<a style="display: block;width: 100px;height: 40px;background: #ddd;line-height: 40px;text-align: center;margin: 20px auto;" id="confirm1">\u786E\u8BA4</a>';
+
+      var assigner = document.createElement("div");
+      assigner.id = 'dialog-form';
+
+      assigner.innerHTML = '<div><p class="assignText">\u6307\u5B9A\u5BA1\u6279\u4EBA</p></div>\n\n   \t<div class="buttonContainer"><button id="save3" class="ui-button" style="float:left">\u4FDD\u5B58</button>\n   \t<button id="cancel3" class="ui-button" style="float:right">\u53D6\u6D88</button></div>\n   \t';
+      this.$element.appendChild(assigner);
+      this.$element.appendChild(RightClickHtml);
+      this.$element.appendChild(attrText);
+    }
+
+    /**
+     * 初始化节点
+     */
+
+  }, {
+    key: 'initNodes',
+    value: function initNodes() {
+      var _this2 = this;
+
+      var nodes = this.options.nodes;
+      nodes.forEach(function (data) {
+        var node = _this2.createNode(data);
+
+        _this2.cache.data = _this2.cache.data || {};
+        _this2.cache.data[data.id] = data;
+
+        if (node) {
+          _this2.nodes[data.id] = node;
+          node.renderTo(_this2.$board);
+        }
+      });
+
+      nodes.forEach(function (data) {
+
+        var node = _this2.resolveNode(data.id);
+
+        if (node) {
+          node.updateStatus(data.taskUserList.length > 0 ? data.taskUserList[0].taskStatus : '');
+        }
+      });
+    }
+
+    /**
+     * 点击事件
+     */
+
+  }, {
+    key: 'delegateEvents',
+    value: function delegateEvents() {
+      var _this3 = this;
+
+      //数据模板
+      var dataTemplate = {
+        "endEvent": {},
+        "exclusiveGatewayList": [],
+        "flowList": [],
+        "parGateWayList": [],
+        "processId": "",
+        "processName": "",
+        "startEvent": {},
+        "usertaskList": []
+      };
+      var clickCount = 0;
+      var idArray = [];
+      var i = 0;
+
+      //获取已存在的clickout值，并取出其中最大值
+      this.options.nodes.forEach(function (value, index) {
+        idArray.push(value.id.replace(/[^0-9]/ig, ""));
+      });
+      Array.prototype.max = function () {
+        return Math.max.apply({}, this);
+      };
+      clickCount = idArray.max();
+
+      this.on('resize', function () {
+        _this3.updateCanvasSize();
+      });
+
+      if (document.getElementById("save")) {
+        //保存
+        document.getElementById("save").onclick = function () {
+
+          _this3.createData(dataTemplate);
+
+          _this3.sendData(dataTemplate, clickCount);
+        };
+      }
+
+      if (document.getElementById("save2")) {
+        //编辑
+        document.getElementById("save2").onclick = function () {
+
+          _this3.createData(dataTemplate);
+          _this3.sendData(dataTemplate, clickCount);
+        };
+      }
+
+      this.$element.addEventListener('click', function (event) {
+        var target = event.target;
+
+        _this3.menuHide();
+        while (target) {
+          if (target.classList && target.classList.contains('workflower-node')) {
+            var nodeId = target.getAttribute('data-id');
+            var node = _this3.nodes[nodeId];
+
+            /**
+             * @emits {click} 节点点击事件，传入事件函数的参数：event, clickedComponentType == 'node', componentData = nodeData
+             */
+            _this3.emit('onNodeClick', event, node);
+
+            /**
+             * @emits {click} 全局点击事件，传入事件函数的参数：event, clickedComponentType == 'node', componentData = nodeData
+             */
+            _this3.emit('click', event, 'node', node);
+            break;
+          } else {
+            target = target.parentNode;
+          }
+        }
+      });
+      //右键
+      this.$element.addEventListener('contextmenu', function (event) {
+        var target = event.target;
+        while (target) {
+          if (target.classList && target.classList.contains('workflower-node')) {
+            var _ret = function () {
+              var nodeId = target.getAttribute('data-id');
+              var node = _this3.nodes[nodeId];
+
+              _this3.emit('contextmenu', event, node, target);
+              _this3.emit('rightClick', event, node, target);
+
+              var currentId = node.$element.id.slice(5);
+              var nextNodeId = void 0;
+              var prevNodeId = void 0;
+
+              //右键行为
+              _this3.menu(event, "menu", node);
+
+              //添加下级节点
+              document.getElementById("addNode").onclick = function () {
+                clickCount++;
+
+                _this3.addNode(node, _this3.options.nodes, clickCount, currentId, prevNodeId, nextNodeId);
+              };
+              //添加同级分支
+              document.getElementById("addBranch").onclick = function () {
+                clickCount++;
+
+                _this3.addBranch(node, _this3.options.nodes, clickCount, currentId, prevNodeId, nextNodeId);
+              };
+              //删除元素
+              document.getElementById("deleteNode").onclick = function () {
+                _this3.deleteNode(node, _this3.options.nodes, clickCount, i, currentId, prevNodeId, nextNodeId);
+              };
+              //修改属性
+              document.getElementById("modifyAttr").onclick = function () {
+
+                _this3.emit('modifyAttr', node, _this3.options.nodes, dataTemplate);
+                _this3.modifyAttr(node, _this3.options.nodes, dataTemplate, currentId, prevNodeId, nextNodeId);
+                _this3.createData(dataTemplate, currentId, prevNodeId, nextNodeId);
+              };
+
+              //设置审批人
+              document.getElementById("setAssign").onclick = function () {
+
+                _this3.emit("setAssign", node, _this3.options.nodes, dataTemplate);
+                _this3.setAssign(node, _this3.options.nodes, dataTemplate, currentId, prevNodeId, nextNodeId);
+                _this3.createData(dataTemplate, currentId, prevNodeId, nextNodeId);
+              };
+
+              return 'break';
+            }();
+
+            if (_ret === 'break') break;
+          } else {
+            target = target.parentNode;
+          }
+        }
+      });
+    }
+  }, {
+    key: 'addUser',
+    value: function addUser() {
+      var list = document.querySelector("#list");
+      var listNode = document.createElement("select");
+      list.style.display = 'block';
+      var select = list.getElementsByTagName("select");
+
+      if (select.length <= 0) {
+
+        _axios2.default.get('/userRole/queryAuthUsers').then(function (res) {
+
+          var userData = res.data.data;
+
+          userData.forEach(function (value, index) {
+
+            listNode.innerHTML += '<option value =' + value.userName + '>' + value.userName + '</option>';
+
+            document.getElementById("list").appendChild(listNode);
+          });
+        }).catch(function (err) {});
+      }
+    }
+
+    //制作数据模板
+
+  }, {
+    key: 'createData',
+    value: function createData(dataTemplate, currentId, prevNodeId, nextNodeId) {
+      var _this4 = this;
+
+      this.options.nodes.forEach(function (value, index) {
+
+        value.incoming.forEach(function (value, index) {
+
+          dataTemplate.flowList.push(value);
+        });
+        value.outgoing.forEach(function (value, index) {
+
+          dataTemplate.flowList.push(value);
+        });
+        _this4.unique(dataTemplate.flowList);
+
+        if (value.elementType == 0) {
+          dataTemplate.startEvent.id = value.id;
+        } else if (value.elementType == 2) {
+          dataTemplate.endEvent.id = value.id;
+        } else if (value.elementType == 3) {
+          dataTemplate.exclusiveGatewayList.push({ "id": value.id, "name": value.id });
+          _this4.unique1(dataTemplate.exclusiveGatewayList);
+        } else {
+
+          dataTemplate.usertaskList.push({
+            "assignee": [],
+            "charInfo": {
+              "condition": "",
+              "userTaskId": "",
+              "completionCondition": "",
+              "elementVariable": "assignee",
+              "sequential": "false",
+              "inputDataItem": ""
+            },
+            "id": value.id,
+            "name": value.name || value.id
+
+          });
+        }
+        _this4.unique1(dataTemplate.usertaskList);
+      });
+
+      var workflowerName = document.getElementById("workflowerName").value;
+      var key = new Date().getTime();
+      if (localStorage.getItem('wfkey')) {
+        dataTemplate.businessKey = localStorage.getItem('wfkey');
+      } else {
+        dataTemplate.businessKey = key;
+      }
+
+      if (workflowerName == "") {
+        dataTemplate.processId = localStorage.getItem('wfkey') || this.$element.id;
+        dataTemplate.processName = this.$element.id;
+      } else {
+        dataTemplate.processId = localStorage.getItem('wfkey') || "wf" + key;
+        dataTemplate.processName = workflowerName;
+      }
+      console.log(dataTemplate);
+      return dataTemplate;
+    }
+
+    //sendData
+
+  }, {
+    key: 'sendData',
+    value: function sendData(dataTemplate, clickCount) {
+
+      dataTemplate.flowList.forEach(function (value, index) {
+        console.log(value.targetRef);
+        if (value.targetRef == "endevent1" && value.sourceRef == "editable1") {
+          dataTemplate.flowList.splice(index, 1);
+        }
+      });
+
+      _axios2.default.post('/bpmn/produceBpmnJson', dataTemplate).then(function (res) {
+        if (res.data.status == 200) {
+          alert('保存成功');
+          window.history.go(-1);
+        } else {
+          alert('保存失败');
+        }
+      });
+    }
+
+    //初始化命名
+
+  }, {
+    key: 'formateNodeName',
+    value: function formateNodeName(node, jsonData, currentId, prevNodeId, nextNodeId) {
+
+      var children = node.$element.children[0].children[1];
+      jsonData.forEach(function (value, index) {
+        if (value.id == currentId) {
+
+          document.getElementById("nodeName").value = value.name || value.id;
+          children.innerHTML = value.name || value.id;
+        }
+      });
+    }
+
+    //修改属性
+
+  }, {
+    key: 'modifyAttr',
+    value: function modifyAttr(node, jsonData, dataTemplate, currentId, prevNodeId, nextNodeId) {
+
+      var children = node.$element.children[0].children[1];
+      var textList = document.querySelector('#textlist');
+
+      //回填功能
+      var num = currentId.replace(/[^0-9]/ig, "");
+      num -= 1;
+
+      document.getElementById("nodeNameContainer").appendChild(document.getElementById("nodeName"));
+
+      this.remove('#nodeNameContainer', "#nodeName", 1, document.getElementById("nodeNameContainer").children.length - 1);
+
+      jsonData.forEach(function (value, index) {
+        if (value.id == currentId) {
+
+          document.getElementById("nodeName").value = value.name || value.id;
+          children.innerHTML = value.name || value.id;
+        }
+      });
+
+      //点击保存按钮
+      document.getElementById("confirm1").onclick = function () {
+
+        var nodeName = document.getElementById("nodeName").value;
+
+        jsonData.forEach(function (value, index) {
+          if (value.id == currentId) {
+
+            dataTemplate.usertaskList.forEach(function (value1, index1) {
+
+              if (value1.id == currentId) {
+
+                if (nodeName == "") {
+                  alert("请输入内容");
+                } else {
+
+                  value.name = nodeName;
+                  children.innerHTML = nodeName;
+                  value1.name = nodeName;
+                }
+              }
+            });
+          }
+        });
+      };
+      this.menuHide();
+      dataTemplate.flowList.forEach(function (value, index) {
+        if (value.sourceRef == "editable02" && value.targetRef == "endevent1" && "editable02".targetRef != "endevent1") {
+          dataTemplate.flowList.splice(index, 1);
+        }
+      });
+    }
+
+    //设置审批人
+
+  }, {
+    key: 'setAssign',
+    value: function setAssign(node, jsonData, dataTemplate, currentId, prevNodeId, nextNodeId) {
+
+      var dialogForm = document.querySelector('#dialog-form');
+      //获取checked的value
+      var radio = document.getElementsByName("radio");
+
+      var selectvalue = null; //  selectvalue为radio中选中的值
+
+      for (var i = 0; i < radio.length; i++) {
+
+        if (radio[i].checked == true) {
+
+          selectvalue = radio[i].value;
+
+          break;
+        }
+      }
+
+      //回填审批人
+      setTimeout(function () {
+        var assigneeDatas = void 0;
+
+        dataTemplate.usertaskList.forEach(function (value, index) {
+          //回填radio
+          if (value.id == currentId) {
+
+            if (value.charInfo.condition == "${nrOfInstances-nrOfCompletedInstances==0}") {
+
+              selectvalue = "many";
+            } else if (value.charInfo.condition == "${nrOfInstances-nrOfCompletedInstances==(nrOfInstances-1)}") {
+
+              selectvalue = "one";
+            } else {
+
+              selectvalue = "onlyone";
+            }
+            //将selectvalue的值转换为选中的radio
+            for (var i = 0; i < radio.length; i++) {
+
+              if (selectvalue == radio[i].value) {
+
+                radio[i].checked = true;
+
+                break;
+              }
+            }
+          }
+
+          if (value.assignee.length == 0) {
+            assigneeDatas = jsonData;
+          } else {
+            assigneeDatas = dataTemplate.usertaskList;
+          }
+        });
+
+        //将jsonData数据添加到dataTemplate
+        jsonData.forEach(function (value, index) {
+          dataTemplate.usertaskList.forEach(function (value1, index1) {
+            if (value1.id == value.id) {
+
+              if (value.taskUserList && value.taskUserList.length > 0) {
+                if (value.taskUserList[0].assigneeUsers && value.taskUserList[0].assigneeUsers.length > 0) {
+
+                  value1.assignee = value.taskUserList[0].assigneeUsers;
+                } else if (value.taskUserList[0].assignee != "") {
+
+                  value1.assignee.push(value.taskUserList[0].assignee);
+                }
+              }
+            }
+          });
+        });
+        assigneeDatas.forEach(function (value, index) {
+          if (value.id == currentId) {
+
+            var assignerData = [];
+            var assignerDataEdit = [];
+
+            if (value.taskUserList && value.taskUserList.length > 0) {
+              if (!value.taskUserList[0].assigneeUsers || value.taskUserList[0].assigneeUsers.length == 0) {
+                assignerDataEdit.push(value.taskUserList[0].assignee);
+              } else {
+                assignerDataEdit = value.taskUserList[0].assigneeUsers;
+              }
+            }
+            assignerData = value.assignee || assignerDataEdit;
+            //去重
+            var data = [];
+            var json1 = {};
+            for (var i = 0; i < assignerData.length; i++) {
+              if (!json1[assignerData[i]]) {
+                data.push(assignerData[i]);
+                json1[assignerData[i]] = 1;
+              }
+            }
+            assignerData = data;
+
+            $(".select2-selection__rendered").empty();
+            assignerData.forEach(function (value2, index2) {
+
+              document.getElementsByClassName("select2-selection__rendered")[0].innerHTML = "";
+              if (value2 != []) {
+                $.get('/userCenter/getUserDetailInfo?id=' + value2, function (json) {
+
+                  var inputTemplate = document.createElement("li");
+                  inputTemplate.className = "select2-selection__choice";
+                  inputTemplate.title = json.data.userName;
+
+                  inputTemplate.innerHTML = '<span class="select2-selection__choice__remove" role="presentation">\xD7</span>' + json.data.userName;
+                  document.getElementsByClassName("select2-selection__rendered")[0].appendChild(inputTemplate);
+                  document.getElementById("assigneeName").value = json.data.userName;
+                });
+              }
+            });
+          }
+        });
+      }, 1);
+
+      setTimeout(function () {
+        $("#assigneeName").val(null).trigger("change");
+      }, 2);
+      //设置委托人时的保存
+      document.getElementById("save3").onclick = function () {
+
+        var assigneeName = document.getElementById("assigneeName").value;
+
+        jsonData.forEach(function (value, index) {
+          if (value.id == currentId) {
+
+            dataTemplate.usertaskList.forEach(function (value1, index1) {
+
+              if (value1.id == currentId) {
+
+                if (assigneeName == "") {
+                  alert("请输入内容");
+                } else {
+
+                  var liLength = Array.prototype.slice.call(document.getElementsByClassName("select2-selection__rendered")[0].children).length;
+
+                  if (liLength == 1) {
+                    value1.assignee.push(assigneeName);
+                  } else if (liLength >= 2) {
+
+                    Array.prototype.slice.call(document.getElementsByClassName("select2-selection__rendered")[0].children).forEach(function (value, index) {
+                      if (value.title != "") {
+                        //获取用户
+                        $.get('/userRole/queryAuthUsers', function (json) {
+
+                          json.data.forEach(function (value2, index2) {
+                            if (value2.userName == value.title) {
+                              //通过用户ID获取用户详细信息，并将其回填到输入框中
+                              $.get('/userCenter/getUserDetailInfo?id=' + value2.id, function (data) {
+                                var inputTemplate = document.createElement("li");
+                                inputTemplate.className = "select2-selection__choice";
+                                inputTemplate.title = json.data.userName;
+
+                                inputTemplate.innerHTML = '<span class="select2-selection__choice__remove" role="presentation">\xD7</span>' + json.data.userName;
+                                document.getElementsByClassName("select2-selection__rendered")[0].appendChild(inputTemplate);
+                              });
+
+                              //去重
+                              value1.assignee.push(value2.id);
+
+                              var res = [];
+                              var json = {};
+                              for (var i = 0; i < value1.assignee.length; i++) {
+                                if (!json[value1.assignee[i]]) {
+                                  res.push(value1.assignee[i]);
+                                  json[value1.assignee[i]] = 1;
+                                }
+                              }
+                              value1.assignee = res;
+                              for (var i = 0; i < radio.length; i++) {
+
+                                if (radio[i].checked == true) {
+
+                                  selectvalue = radio[i].value;
+
+                                  break;
+                                }
+                              }
+                              console.log(value1);
+                              console.log(selectvalue);
+
+                              //全部通过才通过
+                              if (selectvalue == "many") {
+                                value1.charInfo.condition = value1.charInfo.completionCondition = "${nrOfInstances-nrOfCompletedInstances==0}";
+
+                                value1.charInfo.inputDataItem = "${assigneeList}";
+                                //一人通过即通过
+                              } else if (selectvalue == "one") {
+
+                                value1.charInfo.condition = value1.charInfo.completionCondition = "${nrOfInstances-nrOfCompletedInstances==(nrOfInstances-1)}";
+
+                                value1.charInfo.inputDataItem = "${assigneeList}";
+                              } else {
+                                value1.charInfo.condition = value1.charInfo.completionCondition = "";
+                                value1.charInfo.sequential = "true";
+                              }
+                            }
+                          });
+                        });
+                      }
+                    });
+                  }
+                }
+              }
+            });
+          }
+        });
+      };
+    }
+  }, {
+    key: 'watchNodeOffset',
+    value: function watchNodeOffset() {
+      var _this5 = this;
+
+      Object.keys(this.nodes).forEach(function (id) {
+        var node = _this5.nodes[id];
+
+        node.on('layoutChange', function (prop, old, val) {
+
+          _this5.updateCureveOfNode(node);
+
+          _this5.emit('resize');
+        });
+      });
+    }
+  }, {
+    key: 'createNode',
+    value: function createNode(data) {
+      var node = this.nodes[data.id] || new _node2.default(data);
+      return node;
+    }
+
+    /**
+     * 把 node id 转成 Node 实例
+     * @param {String|Node} id
+     * @returns {Node}
+     */
+
+  }, {
+    key: 'resolveNode',
+    value: function resolveNode(id) {
+      return typeof id === 'string' ? this.nodes[id] : id;
+    }
+
+    /**
+     * 把 数据 id 转成 Data 实例
+     * @param {String|Node} id
+     * @returns {Node}
+     */
+
+  }, {
+    key: 'resolveData',
+    value: function resolveData(id) {
+      return typeof id === 'string' ? this.cache.data[id] : id;
+    }
+
+    /**
+     * 节点排列
+     */
+
+  }, {
+    key: 'layoutNodes',
+    value: function layoutNodes(nodes) {
+      var _this6 = this;
+
+      var startY = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var startX = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+      var padding = parseInt(this.options.padding);
+      var topCount = startY;
+      var top = startY;
+      var left = startX + padding;
+      var bottom = startY + padding;
+      var leftOfNextLevel = void 0;
+      var topOfNextLevel = void 0;
+
+      nodes = nodes || this.getRootNodes();
+      if (nodes && nodes instanceof Array) {
+        var currentLevelTop = top;
+
+        nodes.forEach(function (node) {
+          var targets = _this6.getTargetNodes(node);
+
+          topOfNextLevel = top;
+          leftOfNextLevel = left + parseInt(node.width);
+
+          if (targets.length > 0) {
+            var childArea = _this6.layoutNodes(targets, top, leftOfNextLevel);
+            var sup_top = childArea.top + (childArea.bottom - childArea.top) / 2;
+
+            node.top = sup_top;
+          } else {
+            node.top = top;
+          }
+
+          node.left = Math.max(node.left, left);
+
+          topCount = topOfNextLevel;
+          top += padding + parseInt(node.height);
+        });
+      }
+
+      this.emit('resize');
+
+      return {
+        top: startY,
+        bottom: top,
+        left: startX,
+        right: left + leftOfNextLevel,
+        children: nodes.length
+        // childrenGap:
+      };
+    }
+
+    /**
+     * 更新节点的连接线
+     * @param {Node} node
+     */
+
+  }, {
+    key: 'updateCureveOfNode',
+    value: function updateCureveOfNode(node) {
+      var _this7 = this;
+
+      var sourceNodes = this.getSourceNodes(node);
+      var targetNodes = this.getTargetNodes(node);
+      var point = node.getPoint();
+
+      // 更新入口的连接线
+      sourceNodes.forEach(function (source) {
+        var curveId = source.id + '->' + node.id;
+        var curve = _this7.lines[curveId];
+
+        if (curve) {
+          curve.endX = point.left;
+          curve.endY = point.top;
+        }
+      });
+
+      // 更新出口的连接线
+      targetNodes.forEach(function (target) {
+        var curveId = node.id + '->' + target.id;
+        var curve = _this7.lines[curveId];
+
+        if (curve) {
+          curve.startX = point.left;
+          curve.startY = point.top;
+        }
+      });
+    }
+
+    /**
+     * 连线
+     */
+
+  }, {
+    key: 'drawCurves',
+    value: function drawCurves(nodes) {
+      var _this8 = this;
+
+      nodes = nodes || this.getRootNodes();
+
+      if (nodes && nodes instanceof Array) {
+        nodes.forEach(function (node) {
+          var sourceOffset = node.getPoint();
+          var targets = _this8.getTargetNodes(node);
+
+          sourceOffset.left += sourceOffset.width / 2;
+
+          targets.forEach(function (target) {
+            var targetOffset = target.getPoint();
+            targetOffset.left -= 4;
+            var curve = new _curve2.default(sourceOffset, targetOffset);
+            var path = curve.draw();
+            var curveId = node.id + '->' + target.id;
+
+            curve.id = curveId;
+            _this8.lines[curveId] = curve;
+            _this8.$paths.appendChild(path);
+          });
+
+          _this8.drawCurves(targets);
+        });
+      }
+    }
+
+    /**
+     * 获取根节点
+     */
+
+  }, {
+    key: 'getRootNodes',
+    value: function getRootNodes() {
+      var _this9 = this;
+
+      var cache = this.cache[Workflow.ROOTS];
+
+      if (cache) {
+        return cache;
+      } else {
+        var roots = [];
+
+        Object.keys(this.nodes).forEach(function (id) {
+          var node = _this9.nodes[id];
+
+          if (parseInt(node.data.elementType) === 0) {
+            roots.push(node);
+          }
+        });
+
+        return this.cache[Workflow.ROOTS] = roots;
+      }
+    }
+
+    /**
+     * 获取来源节点
+     * @param {String|Node} id
+     * @returns {Array<Node>}
+     */
+
+  }, {
+    key: 'getSourceNodes',
+    value: function getSourceNodes(id) {
+      var _this10 = this;
+
+      var node = this.resolveNode(id);
+      var list = node.data.incoming || [];
+      var result = [];
+
+      list.forEach(function (source) {
+        var node = _this10.nodes[source.sourceRef];
+
+        if (node) {
+          result.push(node);
+        }
+      });
+
+      return result;
+    }
+
+    /**
+     * 获取来源数据
+     * @param {String} id
+     * @returns {Array}
+     */
+
+  }, {
+    key: 'getSourceData',
+    value: function getSourceData(id) {
+      var _this11 = this;
+
+      var data = this.resolveData(id);
+      var list = data.incoming || [];
+      var result = [];
+
+      list.forEach(function (source) {
+        var data = _this11.cache.data[source.sourceRef];
+
+        if (data) {
+          result.push(data);
+        }
+      });
+
+      return result;
+    }
+
+    /**
+     * 获取目标节点
+     * @param {String|Node} id
+     * @returns {Array<Node>}
+     */
+
+  }, {
+    key: 'getTargetNodes',
+    value: function getTargetNodes(id) {
+      var _this12 = this;
+
+      var node = this.resolveNode(id);
+      var list = node.data.outgoing || [];
+      var result = [];
+
+      list.forEach(function (target) {
+        var node = _this12.nodes[target.targetRef];
+
+        if (node) {
+          result.push(node);
+        }
+      });
+
+      return result;
+    }
+
+    /**
+     * 获取目标数据
+     * @param {String} id
+     * @returns {Array}
+     */
+
+  }, {
+    key: 'getTargetData',
+    value: function getTargetData(id) {
+      var _this13 = this;
+
+      var data = this.resolveData(id);
+      var list = data.outgoing || [];
+      var result = [];
+
+      list.forEach(function (target) {
+        var data = _this13.cache.data[target.targetRef];
+
+        if (data) {
+          result.push(data);
+        }
+      });
+
+      return result;
+    }
+
+    /**
+     * 更新画板尺寸大小
+     */
+
+  }, {
+    key: 'updateCanvasSize',
+    value: function updateCanvasSize() {
+      var _this14 = this;
+
+      var x = 0;
+      var y = 0;
+
+      Object.keys(this.nodes).forEach(function (id) {
+        var node = _this14.nodes[id];
+        var point = node.getPoint();
+
+        x = Math.max(x, point.right);
+        y = Math.max(y, point.bottom);
+      });
+
+      this.$board.style.width = x + 'px';
+      this.$board.style.height = y + 'px';
+    }
+
+    /**
+     * 新增节点
+     * @param nodeOptions
+     */
+
+  }, {
+    key: 'appendNode',
+    value: function appendNode(nodeOptions) {
+      var node = nodeOptions instanceof _node2.default ? nodeOptions : this.createNode(nodeOptions);
+      //this.cache.data[node.id] = nodeOptions
+      if (!this.nodes[node.id]) {
+        this.nodes[node.id] = node;
+        this.$board.appendChild(node.$element);
+      }
+    }
+
+    //右键菜单
+
+  }, {
+    key: 'menu',
+    value: function menu(event, menu, node) {
+      event.preventDefault();
+
+      //网关只需要有增加下级节点
+      document.getElementById("menu").children[2].style.display = this.nodes[node.$element.id.slice(5)].data.elementType == 3 ? "none" : "block";
+      document.getElementById("menu").children[0].style.display = this.nodes[node.$element.id.slice(5)].data.elementType == 3 ? "none" : "block";
+      document.getElementById("menu").children[3].style.display = this.nodes[node.$element.id.slice(5)].data.elementType == 3 ? "none" : "block";
+      document.getElementById("menu").children[4].style.display = this.nodes[node.$element.id.slice(5)].data.elementType == 3 ? "none" : "block";
+      //若不是网关，但outgoing为两个的话或该节点是开始节点和结束节点，都不能直接删除该节点
+      if (this.nodes[node.$element.id.slice(5)].data.elementType != 3 && this.nodes[node.$element.id.slice(5)].data.outgoing.length >= 2 || this.nodes[node.$element.id.slice(5)].data.id == "startevent1" || this.nodes[node.$element.id.slice(5)].data.id == "endevent1") {
+        document.getElementById("menu").children[0].style.display = "none";
+      }
+
+      var x = event.pageX - 260 + 'px';
+      var y = event.pageY - 288 + 'px';
+      var menu = document.querySelector('#menu');
+      menu.style.left = x;
+      menu.style.top = y;
+      menu.style.width = 130 + 'px';
+      menu.style.display = 'block';
+    }
+
+    //添加具体元素
+
+  }, {
+    key: 'addNode',
+    value: function addNode(node, jsonData, clickCount, currentId, prevNodeId, nextNodeId) {
+
+      var i = 0;
+      jsonData.forEach(function (value, index) {
+        value.incoming.forEach(function (value1, index) {
+          if (value1.sourceRef == currentId) {
+
+            nextNodeId = value.id;
+          }
+        });
+        value.outgoing.forEach(function (value1, index) {
+          if (value1.targetRef == currentId) {
+            prevNodeId = value.id;
+          }
+        });
+      });
+
+      jsonData.forEach(function (value, index) {
+
+        if (value.id == currentId) {
+
+          i = index;
+          nextNodeId = value.outgoing[0].targetRef;
+          value.outgoing[0].targetRef = "editable" + clickCount;
+
+          jsonData.forEach(function (value, index) {
+            if (value.id == nextNodeId) {
+
+              value.incoming.forEach(function (value1, index) {
+
+                if (value1.sourceRef == currentId) {
+                  if (value1.targetRef == nextNodeId) {
+                    value.incoming[index] = {
+                      "id": "flow" + (clickCount + 40),
+                      "sourceRef": "editable" + clickCount,
+                      "targetRef": nextNodeId
+                    };
+                  } else {
+                    value.incoming[index] = {
+                      "id": "flow" + (clickCount + 40),
+                      "sourceRef": "editable" + clickCount,
+                      "targetRef": "editable0" + clickCount
+                    };
+                  }
+                }
+              });
+            }
+          });
+        }
+      });
+
+      var data = {
+
+        "taskUserList": [{
+          "taskId": "",
+          "formKey": "",
+          "businessKey": "",
+          "assignee": "",
+          "taskKey": "editable" + clickCount,
+          "endTime": null,
+          "taskName": "editable" + clickCount,
+          "variables": null,
+          "startTime": null,
+          "activitiId": "",
+          "businessTitle": "",
+          "taskStatus": "2",
+          "processInstanceId": "",
+          "companyId": "",
+          "comment": ""
+        }],
+        "id": "editable" + clickCount,
+        "incoming": [{
+          "id": "flow" + (clickCount + 50),
+          "targetRef": "editable" + clickCount,
+          "sourceRef": currentId
+        }],
+        "processInstanceId": "",
+        "businessKey": "",
+        "outgoing": [{
+          "id": "flow" + (clickCount + 8),
+          "targetRef": nextNodeId,
+          "sourceRef": "editable" + clickCount
+        }],
+        "elementType": "1",
+        "procDefId": ""
+
+      };
+
+      this.appendNode(data);
+      jsonData.splice(i + 1, 0, data);
+      console.log(jsonData);
+      this.refresh();
+      this.menuHide();
+    }
+
+    //删除节点
+
+  }, {
+    key: 'deleteNode',
+    value: function deleteNode(node, jsonData, clickCount, i, currentId, prevNodeId, nextNodeId) {
+      var _this15 = this;
+
+      var currentNode = node.$element;
+
+      jsonData.forEach(function (value, index) {
+
+        if (value.id == currentId) {
+          i = index;
+          //前节点ID
+          prevNodeId = value.incoming[0].sourceRef;
+          //后节点ID
+          nextNodeId = value.outgoing[0].targetRef;
+          //判断是删除下级节点还是同级分支
+          if (nextNodeId.indexOf("0") == -1) {
+            //删除下级节点
+            _this15.deleteUnderlingNode(jsonData, currentId, prevNodeId, nextNodeId);
+          } else {
+            //删除同级分支
+            jsonData.forEach(function (value, index) {
+              //对后节点进行修改
+              if (value.id == nextNodeId) {
+                value.incoming.forEach(function (value6, index6) {
+                  if (value6.sourceRef == currentId) {
+                    value.incoming.splice(index6, 1);
+                  }
+                  if (value6.sourceRef == prevNodeId) {
+                    value.incoming.splice(index6, 1);
+                  }
+                });
+
+                //当节点仅为一个时,就将节点集合删除
+                if (value.incoming.length == 1) {
+
+                  if (value.id.indexOf("0") != -1) {
+                    jsonData.forEach(function (value7, index7) {
+                      if (value.id == value7.id) {
+
+                        jsonData.forEach(function (value, index) {
+                          //修改前方节点的outgoing
+                          if (value.id == value7.incoming[0].sourceRef) {
+                            value.outgoing = value7.outgoing;
+                            value.outgoing.forEach(function (value, index) {
+                              value.sourceRef = value7.incoming[0].sourceRef;
+                            });
+                          }
+                          //修改后方节点的incoming
+                          value7.outgoing.forEach(function (value8, index8) {
+                            if (value.id == value8.targetRef) {
+                              value.incoming[0].sourceRef = value7.incoming[0].sourceRef;
+                            }
+                          });
+                        });
+
+                        jsonData.splice(index7, 1);
+                      }
+                    });
+                  }
+                }
+                if (value.incoming.length == 0) {
+                  value.incoming.push({ id: "flow" + (clickCount + 9), sourceRef: prevNodeId, targetRef: nextNodeId });
+                  value.incoming[0].sourceRef == prevNodeId;
+                }
+              }
+              //对前节点进行修改
+              if (value.id == prevNodeId) {
+
+                value.outgoing.forEach(function (value1, index1) {
+
+                  if (localStorage.getItem('title') == "新建") {
+                    if (value1.id == "flow18") {
+                      value.outgoing.splice(index1, 1);
+                    }
+                  }
+
+                  //删除同级分支
+                  if (value1.targetRef == currentId) {
+
+                    value.outgoing.splice(index1, 1);
+                    //当同级分支只剩下一个时,自动转换为下级节点
+                    if (value.outgoing.length == 2) {} else if (value.outgoing.length == 1 && value.incoming.length == 0) {
+                      document.getElementById("menu").children[0].style.display = "block";
+                      //非开头节点
+                    } else if (value.outgoing.length == 1 && value.incoming.length != 0) {} else if (value.outgoing.length == 0) {
+
+                      value.outgoing.push({ id: "flow" + (clickCount + 11), sourceRef: prevNodeId, targetRef: nextNodeId });
+
+                      document.getElementById("menu").children[0].style.display = "block";
+                    }
+                  }
+                });
+              }
+            });
+          }
+        }
+      });
+
+      this.nodes[nextNodeId].left = parseInt(currentNode.style.left);
+      this.nodes[nextNodeId].top = parseInt(currentNode.style.top);
+
+      jsonData.forEach(function (value, index) {
+        if (value.id == currentId) {
+          i = index;
+        }
+      });
+      jsonData.splice(i, 1);
+      this.refresh();
+      this.menuHide();
+    }
+
+    //删除下级节点
+
+  }, {
+    key: 'deleteUnderlingNode',
+    value: function deleteUnderlingNode(jsonData, currentId, prevNodeId, nextNodeId) {
+      jsonData.forEach(function (value, index) {
+        if (value.id == nextNodeId) {
+          value.incoming[0].sourceRef = prevNodeId;
+        }
+
+        if (value.id == prevNodeId) {
+          value.outgoing.forEach(function (value, index) {
+
+            if (value.targetRef == currentId) {
+
+              value.targetRef = nextNodeId;
+            }
+          });
+        }
+      });
+      this.menuHide();
+    }
+
+    //添加分支
+
+  }, {
+    key: 'addBranch',
+    value: function addBranch(node, jsonData, clickCount, currentId, prevNodeId, nextNodeId) {
+      var _this16 = this;
+
+      var i = 0;
+      var data = {}; //数据模板
+      var nodeGroup = {}; //节点集合
+
+      var nodesArr = [];
+
+      jsonData.forEach(function (value, index) {
+
+        if (value.id == currentId) {
+
+          i = index;
+          //前节点ID
+          prevNodeId = value.incoming[0].sourceRef;
+          //后节点ID
+          nextNodeId = value.outgoing[0].targetRef;
+
+          data = {
+
+            "taskUserList": [{
+              "taskId": "",
+              "formKey": "",
+              "businessKey": "",
+              "assignee": "",
+              "taskKey": "editable" + clickCount,
+              "endTime": null,
+              "taskName": "editable" + clickCount,
+              "variables": null,
+              "startTime": null,
+              "activitiId": "",
+              "businessTitle": "",
+              "taskStatus": "2",
+              "processInstanceId": "",
+              "companyId": "",
+              "comment": ""
+            }],
+            "id": "editable" + clickCount,
+            "incoming": [{
+              "id": "flow" + (clickCount + 60),
+              "targetRef": "editable" + clickCount,
+              "sourceRef": prevNodeId
+            }],
+            "processInstanceId": "",
+            "businessKey": "",
+            "outgoing": [{
+              "id": "flow" + (clickCount + 61),
+              "targetRef": "editable0" + clickCount,
+              "sourceRef": "editable" + clickCount
+            }],
+            "elementType": "1",
+            "procDefId": "",
+            "approver": ""
+
+          };
+          if (nextNodeId.indexOf("0") == -1) {
+            value.outgoing[0].targetRef = "editable0" + clickCount;
+          } else {
+            jsonData.forEach(function (v) {
+              if (v.id == nextNodeId) {
+
+                value.outgoing[0].targetRef = nextNodeId;
+                data.outgoing[0].targetRef = nextNodeId;
+              }
+            });
+          }
+
+          //遍历this.options.nodes
+          jsonData.forEach(function (value, index) {
+
+            //设置后节点的incoming
+            if (value.id == nextNodeId) {
+
+              var incomingData = {
+                id: "flow" + (clickCount + 74),
+                sourceRef: "editable" + clickCount,
+                targetRef: "editable0" + clickCount
+              };
+
+              //深拷贝对象
+              nodeGroup = _this16.deepCopy(data);
+
+              nodeGroup.incoming = value.incoming;
+
+              nodeGroup.incoming.push(incomingData);
+
+              nodeGroup.taskUserList[0]["taskName"] = "节点集合0" + clickCount;
+              nodeGroup.id = nodeGroup.taskUserList[0]["taskKey"] = "editable0" + clickCount;
+              nodeGroup.elementType = 3;
+
+              nodeGroup.incoming.forEach(function (value) {
+                if (nextNodeId.indexOf("0") != -1) {
+                  value.targetRef = nextNodeId;
+                } else {
+                  value.targetRef = "editable0" + clickCount;
+                }
+              });
+
+              nodeGroup.outgoing = [{
+                id: "flow0" + (clickCount + 27),
+                sourceRef: "editable0" + clickCount,
+                targetRef: nextNodeId
+              }];
+              if (nextNodeId.indexOf("0") == -1) {
+
+                value.incoming = [{
+                  id: "flow" + (clickCount + 70),
+                  sourceRef: "editable0" + clickCount,
+                  targetRef: nextNodeId
+                }];
+              }
+            }
+            //设置前节点的outgoing
+            if (value.id == prevNodeId) {
+
+              var outgoingData = {
+                id: "flow" + (clickCount + 29),
+                sourceRef: prevNodeId,
+                targetRef: "editable" + clickCount
+              };
+              value.outgoing.push(outgoingData);
+            }
+          });
+        }
+      });
+
+      jsonData.splice(i + 1, 0, data);
+      //如果后节点是网关不必再添加网关
+      if (nextNodeId.indexOf("0") == -1) {
+        jsonData.splice(i + 1, 0, nodeGroup);
+      }
+
+      this.refresh();
+      this.menuHide();
+    }
+
+    //刷新初始化
+
+  }, {
+    key: 'refresh',
+    value: function refresh() {
+      this.initBoard();
+      this.initNodes();
+      this.layoutNodes();
+      this.drawCurves();
+      this.watchNodeOffset();
+    }
+
+    //深拷贝
+
+  }, {
+    key: 'deepCopy',
+    value: function deepCopy(source) {
+      var result;
+      source instanceof Array ? result = [] : result = {};
+
+      for (var key in source) {
+        result[key] = _typeof(source[key]) === 'object' ? this.deepCopy(source[key]) : source[key];
+      }
+      return result;
+    }
+
+    //隐藏右键菜单
+
+  }, {
+    key: 'menuHide',
+    value: function menuHide() {
+      var menu = document.querySelector('#menu');
+      menu.style.display = 'none';
+    }
+  }, {
+    key: 'unique',
+    value: function unique(arr) {
+      //去重
+      for (var i = 0; i < arr.length; i++) {
+
+        for (var j = i + 1; j < arr.length; j++) {
+          if (arr[i].sourceRef == arr[j].sourceRef && arr[i].targetRef == arr[j].targetRef) {
+            arr.splice(j, 1);
+          }
+        }
+      }
+    }
+  }, {
+    key: 'unique1',
+    value: function unique1(arr) {
+      //去重
+      for (var i = 0; i < arr.length; i++) {
+
+        for (var j = i + 1; j < arr.length; j++) {
+          if (arr[i].id == arr[j].id) {
+
+            arr.splice(j, 1);
+          }
+        }
+      }
+    }
+
+    //删除父元素下的子元素
+
+  }, {
+    key: 'remove',
+    value: function remove(oparent, ochild, start, offset) {
+      var parent = document.querySelector(oparent),
+          // 获取父级元素
+
+      children = parent.querySelectorAll(ochild),
+          // 获取子级元素
+      len = children.length,
+          // 子元素的长度
+      start = start || 0,
+          // 开始的位置
+      offset = offset ? start + offset : len; // 删除的数量，offset大于0，如果offset存在的话，那么开始位置加上位移，否则就是元素的长度剩余的长度；
+
+      if (len <= start) return;
+      for (var i = start; i < offset; i++) {
+        parent.removeChild(children[i]);
+      }
+    }
+  }]);
+
+  return Workflow;
 }(_watch2.default);
 
 Workflow.ROOTS = 'ROOTS';
@@ -5572,7 +5609,7 @@ exports = module.exports = __webpack_require__(34)(undefined);
 
 
 // module
-exports.push([module.i, "/*!\n * Workflower\n * A simple workflow editor\n * https://github.com/workflower-js/workflower\n */.workflower{position:relative;width:100%;height:100%;-webkit-touch-callout:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;overflow:visible}.workflower *,.workflower :after,.workflower :before{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.workflower .workflower-board{width:2000px;height:2000px;position:absolute;top:0;left:0;-o-background-size:10px;background-size:10px}.workflower svg.workflower-paths{width:100%;height:100%;position:absolute;top:0;left:0}.workflower svg.workflower-paths path{stroke-dasharray:0;fill:transparent;stroke:#ccc;stroke-width:2}.workflower .workflower-node{-webkit-border-radius:5px;border-radius:5px;width:100px;position:absolute;-webkit-transition:.3s;-o-transition:.3s;-moz-transition:.3s;transition:.3s}.workflower .workflower-node:active,.workflower .workflower-node:focus,.workflower .workflower-node:hover{background-color:rgba(0,0,0,.05)}.workflower .workflower-node>h3{background-color:#45536e;color:#fff;font-size:14px;text-align:center;-webkit-border-radius:5px 5px 0 0;border-radius:5px 5px 0 0;margin:0;padding:5px 0;cursor:move}.workflower .workflower-node>h3 .remove,.workflower .workflower-node>h3 .setting{position:absolute;top:5px;right:4px;background-color:#323c50;padding:0 5px 2px;-webkit-border-radius:4px;border-radius:4px;color:#3f4c65;font-family:Tahoma,serif;font-weight:400;cursor:pointer;-webkit-transition:background-color .3s;-o-transition:background-color .3s;-moz-transition:background-color .3s;transition:background-color .3s}.workflower .workflower-node>h3 .remove:after,.workflower .workflower-node>h3 .setting:after{content:\"x\";display:block}.workflower .workflower-node>h3 .remove:hover,.workflower .workflower-node>h3 .setting:hover{background-color:#a30f0f}.workflower .workflower-node>h3 .setting{width:11px;height:11px;right:auto;left:3px;padding:4px;fill:#697896}.workflower .workflower-node>h3 .setting:after{display:none}.workflower .workflower-node>h3 .setting:hover{background-color:#8396bb;fill:#2e3542}.workflower .workflower-node:after{content:\" \";height:1px;display:block;clear:both}.workflower .workflower-node.type-3 .workflower-label{position:relative;left:200%}.workflower .workflower-node.type-0 h4:empty:before{content:\"\\5F00\\59CB\";opacity:.5}.workflower .workflower-node.type-4 .workflower-point{-webkit-border-radius:0;border-radius:0;-webkit-transform:rotate(45deg) scale(.6) translateY(25%);-moz-transform:rotate(45deg) scale(.6) translateY(25%);-ms-transform:rotate(45deg) scale(.6) translateY(25%);-o-transform:rotate(45deg) scale(.6) translateY(25%);transform:rotate(45deg) scale(.6) translateY(25%)}.workflower .workflower-node.type-4 h4{color:transparent}.workflower .workflower-node.type-4 h4:empty:before{content:\"\";opacity:.5}.workflower .workflower-node.type-2 h4:empty:before{content:\"\\7ED3\\675F\";opacity:.5}.workflower .workflower-inputs{margin-left:-5px;float:left}.workflower .workflower-inputs .workflower-point{margin:2px 4px 0 0;float:left}.workflower .workflower-outputs{margin-right:-5px;float:right;text-align:right}.workflower .workflower-outputs .workflower-point{margin:2px 0 0 4px;cursor:pointer;float:right}.workflower .workflower-label{margin:20px 0 6px;font-size:12px;font-family:sans-serif;color:#697690;cursor:default}.workflower .workflower-label .workflower-picture{display:none;width:50px;height:50px;-webkit-border-radius:50%;border-radius:50%;background-color:rgba(0,0,0,.06);background-image:url(\"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDUwIDUwIiBoZWlnaHQ9IjUwcHgiIGlkPSJMYXllcl8xIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA1MCA1MCIgd2lkdGg9IjUwcHgiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxjaXJjbGUgY3g9IjI1IiBjeT0iMjUiIGZpbGw9Im5vbmUiIHI9IjI0IiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2Utd2lkdGg9IjIiLz48cmVjdCBmaWxsPSJub25lIiBoZWlnaHQ9IjUwIiB3aWR0aD0iNTAiLz48cGF0aCBkPSJNMjkuOTMzLDM1LjUyOGMtMC4xNDYtMS42MTItMC4wOS0yLjczNy0wLjA5LTQuMjFjMC43My0wLjM4MywyLjAzOC0yLjgyNSwyLjI1OS00Ljg4OGMwLjU3NC0wLjA0NywxLjQ3OS0wLjYwNywxLjc0NC0yLjgxOCAgYzAuMTQzLTEuMTg3LTAuNDI1LTEuODU1LTAuNzcxLTIuMDY1YzAuOTM0LTIuODA5LDIuODc0LTExLjQ5OS0zLjU4OC0xMi4zOTdjLTAuNjY1LTEuMTY4LTIuMzY4LTEuNzU5LTQuNTgxLTEuNzU5ICBjLTguODU0LDAuMTYzLTkuOTIyLDYuNjg2LTcuOTgxLDE0LjE1NmMtMC4zNDUsMC4yMS0wLjkxMywwLjg3OC0wLjc3MSwyLjA2NWMwLjI2NiwyLjIxMSwxLjE3LDIuNzcxLDEuNzQ0LDIuODE4ICBjMC4yMiwyLjA2MiwxLjU4LDQuNTA1LDIuMzEyLDQuODg4YzAsMS40NzMsMC4wNTUsMi41OTgtMC4wOTEsNC4yMWMtMS4yNjEsMy4zOS03LjczNywzLjY1NS0xMS40NzMsNi45MjQgIGMzLjkwNiwzLjkzMywxMC4yMzYsNi43NDYsMTYuOTE2LDYuNzQ2czE0LjUzMi01LjI3NCwxNS44MzktNi43MTNDMzcuNjg4LDM5LjE4NiwzMS4xOTcsMzguOTMsMjkuOTMzLDM1LjUyOHoiLz48L3N2Zz4=\");-o-background-size:cover;background-size:cover;text-align:center;margin:auto;opacity:.1}.workflower .workflower-label .workflower-picture img{max-width:100%}.workflower .workflower-label h4{text-align:center;margin:5px}.workflower .workflower-label h4:empty:before{content:\"\\672A\\547D\\540D\\8282\\70B9\";opacity:.5}.workflower .type-0 .workflower-point,.workflower [data-id^=startevent] .workflower-point{background-color:green}.workflower .type-0 .workflower-point:after,.workflower [data-id^=startevent] .workflower-point:after{content:\"\";display:block;width:35%;height:50%;position:absolute;left:50%;top:50%;margin:-8px 0 0 -4px;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);-o-transform:rotate(45deg);transform:rotate(45deg);border:2px solid transparent;border-right-color:#fff;border-bottom-color:#fff}.workflower .workflower-point{background-color:#ccc;width:24px;height:24px;-webkit-border-radius:50%;border-radius:50%;margin:auto;position:relative}.workflower .workflower-point.selected{background-color:#ffe63f}.workflower .workflower-point.status-0{background-color:green}.workflower .workflower-point.status-0:after{content:\"\";display:block;width:35%;height:50%;position:absolute;left:50%;top:50%;margin:-8px 0 0 -4px;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);-o-transform:rotate(45deg);transform:rotate(45deg);border:2px solid transparent;border-right-color:#fff;border-bottom-color:#fff}.workflower .workflower-point.status-1{background-color:#2f86d5}.workflower .workflower-point.status-2{background-color:#ccc}.workflower .workflower-point.status-3{background-color:red}.workflower .workflower-point.status-3:after{content:\"X\";display:-webkit-box;display:-webkit-flex;display:-moz-box;display:-ms-flexbox;display:flex;position:absolute;left:0;top:0;right:0;bottom:0;text-align:center;-webkit-box-pack:center;-webkit-justify-content:center;-moz-box-pack:center;-ms-flex-pack:center;justify-content:center;-webkit-align-content:center;-ms-flex-line-pack:center;align-content:center;color:#fff;font-size:16px}.workflower #textlist{display:none;background:#f7f7f7;position:fixed;z-index:111;left:0;top:0;right:0;bottom:0;margin:auto;width:300px;height:600px}.workflower #menu{background:rgba(0,0,0,.1);position:absolute;text-align:center;display:none;z-index:11111}.workflower #menu p{margin:0;padding:10px}.workflower #menu p:hover{background:gray;color:#fff}", ""]);
+exports.push([module.i, "/*!\n * Workflower\n * A simple workflow editor\n * https://github.com/workflower-js/workflower\n */.workflower{position:relative;width:100%;height:100%;-webkit-touch-callout:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;overflow:auto}.workflower *,.workflower :after,.workflower :before{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.workflower .workflower-board{width:2000px;height:2000px;position:absolute;top:0;left:0;-o-background-size:10px;background-size:10px}.workflower svg.workflower-paths{width:100%;height:100%;position:absolute;top:0;left:0}.workflower svg.workflower-paths path{stroke-dasharray:0;fill:transparent;stroke:#ccc;stroke-width:2}.workflower .workflower-node{-webkit-border-radius:5px;border-radius:5px;width:100px;position:absolute;-webkit-transition:.3s;-o-transition:.3s;-moz-transition:.3s;transition:.3s}.workflower .workflower-node:active,.workflower .workflower-node:focus,.workflower .workflower-node:hover{background-color:rgba(0,0,0,.05)}.workflower .workflower-node>h3{background-color:#45536e;color:#fff;font-size:14px;text-align:center;-webkit-border-radius:5px 5px 0 0;border-radius:5px 5px 0 0;margin:0;padding:5px 0;cursor:move}.workflower .workflower-node>h3 .remove,.workflower .workflower-node>h3 .setting{position:absolute;top:5px;right:4px;background-color:#323c50;padding:0 5px 2px;-webkit-border-radius:4px;border-radius:4px;color:#3f4c65;font-family:Tahoma,serif;font-weight:400;cursor:pointer;-webkit-transition:background-color .3s;-o-transition:background-color .3s;-moz-transition:background-color .3s;transition:background-color .3s}.workflower .workflower-node>h3 .remove:after,.workflower .workflower-node>h3 .setting:after{content:\"x\";display:block}.workflower .workflower-node>h3 .remove:hover,.workflower .workflower-node>h3 .setting:hover{background-color:#a30f0f}.workflower .workflower-node>h3 .setting{width:11px;height:11px;right:auto;left:3px;padding:4px;fill:#697896}.workflower .workflower-node>h3 .setting:after{display:none}.workflower .workflower-node>h3 .setting:hover{background-color:#8396bb;fill:#2e3542}.workflower .workflower-node:after{content:\" \";height:1px;display:block;clear:both}.workflower .workflower-node.type-3 .workflower-label{position:relative;left:200%}.workflower .workflower-node.type-0 h4:empty:before{content:\"\\5F00\\59CB\";opacity:.5}.workflower .workflower-node.type-4 .workflower-point{-webkit-border-radius:0;border-radius:0;-webkit-transform:rotate(45deg) scale(.6) translateY(25%);-moz-transform:rotate(45deg) scale(.6) translateY(25%);-ms-transform:rotate(45deg) scale(.6) translateY(25%);-o-transform:rotate(45deg) scale(.6) translateY(25%);transform:rotate(45deg) scale(.6) translateY(25%)}.workflower .workflower-node.type-4 h4{color:transparent}.workflower .workflower-node.type-4 h4:empty:before{content:\"\";opacity:.5}.workflower .workflower-node.type-2 h4:empty:before{content:\"\\7ED3\\675F\";opacity:.5}.workflower .workflower-inputs{margin-left:-5px;float:left}.workflower .workflower-inputs .workflower-point{margin:2px 4px 0 0;float:left}.workflower .workflower-outputs{margin-right:-5px;float:right;text-align:right}.workflower .workflower-outputs .workflower-point{margin:2px 0 0 4px;cursor:pointer;float:right}.workflower .workflower-label{margin:20px 0 6px;font-size:12px;font-family:sans-serif;color:#697690;cursor:default}.workflower .workflower-label .workflower-picture{display:none;width:50px;height:50px;-webkit-border-radius:50%;border-radius:50%;background-color:rgba(0,0,0,.06);background-image:url(\"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDUwIDUwIiBoZWlnaHQ9IjUwcHgiIGlkPSJMYXllcl8xIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA1MCA1MCIgd2lkdGg9IjUwcHgiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxjaXJjbGUgY3g9IjI1IiBjeT0iMjUiIGZpbGw9Im5vbmUiIHI9IjI0IiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2Utd2lkdGg9IjIiLz48cmVjdCBmaWxsPSJub25lIiBoZWlnaHQ9IjUwIiB3aWR0aD0iNTAiLz48cGF0aCBkPSJNMjkuOTMzLDM1LjUyOGMtMC4xNDYtMS42MTItMC4wOS0yLjczNy0wLjA5LTQuMjFjMC43My0wLjM4MywyLjAzOC0yLjgyNSwyLjI1OS00Ljg4OGMwLjU3NC0wLjA0NywxLjQ3OS0wLjYwNywxLjc0NC0yLjgxOCAgYzAuMTQzLTEuMTg3LTAuNDI1LTEuODU1LTAuNzcxLTIuMDY1YzAuOTM0LTIuODA5LDIuODc0LTExLjQ5OS0zLjU4OC0xMi4zOTdjLTAuNjY1LTEuMTY4LTIuMzY4LTEuNzU5LTQuNTgxLTEuNzU5ICBjLTguODU0LDAuMTYzLTkuOTIyLDYuNjg2LTcuOTgxLDE0LjE1NmMtMC4zNDUsMC4yMS0wLjkxMywwLjg3OC0wLjc3MSwyLjA2NWMwLjI2NiwyLjIxMSwxLjE3LDIuNzcxLDEuNzQ0LDIuODE4ICBjMC4yMiwyLjA2MiwxLjU4LDQuNTA1LDIuMzEyLDQuODg4YzAsMS40NzMsMC4wNTUsMi41OTgtMC4wOTEsNC4yMWMtMS4yNjEsMy4zOS03LjczNywzLjY1NS0xMS40NzMsNi45MjQgIGMzLjkwNiwzLjkzMywxMC4yMzYsNi43NDYsMTYuOTE2LDYuNzQ2czE0LjUzMi01LjI3NCwxNS44MzktNi43MTNDMzcuNjg4LDM5LjE4NiwzMS4xOTcsMzguOTMsMjkuOTMzLDM1LjUyOHoiLz48L3N2Zz4=\");-o-background-size:cover;background-size:cover;text-align:center;margin:auto;opacity:.1}.workflower .workflower-label .workflower-picture img{max-width:100%}.workflower .workflower-label h4{text-align:center;margin:5px}.workflower .workflower-label h4:empty:before{content:\"\\672A\\547D\\540D\\8282\\70B9\";opacity:.5}.workflower .type-0 .workflower-point,.workflower [data-id^=startevent] .workflower-point{background-color:green}.workflower .type-0 .workflower-point:after,.workflower [data-id^=startevent] .workflower-point:after{content:\"\";display:block;width:35%;height:50%;position:absolute;left:50%;top:50%;margin:-8px 0 0 -4px;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);-o-transform:rotate(45deg);transform:rotate(45deg);border:2px solid transparent;border-right-color:#fff;border-bottom-color:#fff}.workflower .workflower-point{background-color:#ccc;width:24px;height:24px;-webkit-border-radius:50%;border-radius:50%;margin:auto;position:relative}.workflower .workflower-point.selected{background-color:#ffe63f}.workflower .workflower-point.status-0{background-color:green}.workflower .workflower-point.status-0:after{content:\"\";display:block;width:35%;height:50%;position:absolute;left:50%;top:50%;margin:-8px 0 0 -4px;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);-o-transform:rotate(45deg);transform:rotate(45deg);border:2px solid transparent;border-right-color:#fff;border-bottom-color:#fff}.workflower .workflower-point.status-1{background-color:#2f86d5}.workflower .workflower-point.status-2{background-color:#ccc}.workflower .workflower-point.status-3{background-color:red}.workflower .workflower-point.status-3:after{content:\"X\";display:-webkit-box;display:-webkit-flex;display:-moz-box;display:-ms-flexbox;display:flex;position:absolute;left:0;top:0;right:0;bottom:0;text-align:center;-webkit-box-pack:center;-webkit-justify-content:center;-moz-box-pack:center;-ms-flex-pack:center;justify-content:center;-webkit-align-content:center;-ms-flex-line-pack:center;align-content:center;color:#fff;font-size:16px}.workflower #textlist{display:none;background:#f7f7f7;position:fixed;z-index:111;left:0;top:0;right:0;bottom:0;margin:auto;width:300px;height:600px}.workflower #menu{background:rgba(0,0,0,.1);position:absolute;text-align:center;display:none;z-index:11111}.workflower #menu p{margin:0;padding:10px}.workflower #menu p:hover{background:gray;color:#fff}", ""]);
 
 // exports
 
