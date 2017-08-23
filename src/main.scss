@@ -132,9 +132,18 @@
     }
 
     &.type-4 {
-      h4:empty:before {
-        content: '';
-        opacity: .5;
+      .workflower-point {
+        border-radius: 0;
+        transform: rotate(45deg) scale(0.6) translateY(25%);
+      }
+
+      h4{
+        color: rgba(0,0,0,0);
+
+        &:empty:before {
+          content: '';
+          opacity: .5;
+        }
       }
     }
 
