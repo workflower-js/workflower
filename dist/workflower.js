@@ -2977,10 +2977,10 @@ var Node = function (_Watch) {
 
     /**
      * 更新节点状态
-     * 0: 审批通过
+     * 0: 已执行
      * 1: 进行中
-     * 2: 未通过
-     * 3: 未开始
+     * 2: 未到达
+     * 3: 驳回
      * 4: 系统自动通过
      */
 
@@ -3000,7 +3000,7 @@ var Node = function (_Watch) {
     key: 'format',
     value: function format() {
       var taskName = '';
-      var taskStatus = 0;
+      var taskStatus = 2;
 
       if (this.data.taskUserList != null) {
         if (this.data.taskUserList.length > 0) {
@@ -3008,27 +3008,23 @@ var Node = function (_Watch) {
 
           if (taskList && taskList.length > 0) {
             taskList.forEach(function (task) {
-              var status = parseInt(task.taskStatus || '0');
+              var status = parseInt(task.taskStatus || '2');
 
-              if (taskStatus <= status) {
+              if (status === 0 || status === 3) {
                 taskName = task.assigneeName ? task.assigneeName + '<div style="font-weight: lighter; font-size: 12px; opacity:.6;">(' + task.taskName + ')</div>' : task.taskName;
 
-                console.log(task.assigneeName);
                 if (task.assigneeName) {
                   taskStatus = status;
-                } else {
+                } else if (status === 0) {
                   taskStatus = 4;
                 }
+              } else {
+                taskName = task.taskName;
+                taskStatus = status;
               }
             });
           }
         } else if (this.data.taskUserList.length == 0) {
-          var dataArr = [];
-
-          dataArr[0] = this.data.name;
-
-          taskName = dataArr[0];
-          taskStatus = dataArr[1];
 
           if (this.data.id == "startevent1") {
             taskName = "开始";
