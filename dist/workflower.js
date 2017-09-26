@@ -4040,6 +4040,10 @@ var Workflow = function (_Watch) {
       assigner.id = 'dialog-form';
 
       assigner.innerHTML = '<div><p class="assignText">\u6307\u5B9A\u5BA1\u6279\u4EBA</p></div>\n\n   \t<div class="buttonContainer"><button id="save3" class="ui-button" style="float:left">\u4FDD\u5B58</button>\n   \t<button id="cancel3" class="ui-button" style="float:right">\u53D6\u6D88</button></div>\n   \t';
+      if (navigator.userAgent.match(/DingTalk/)) {
+        assigner.style.display = 'none';
+      }
+
       this.$element.appendChild(assigner);
       this.$element.appendChild(RightClickHtml);
       this.$element.appendChild(attrText);

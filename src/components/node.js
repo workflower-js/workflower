@@ -104,11 +104,16 @@ export default class Node extends Watch {
 
   /**
    * 更新节点状态
+   * 0: 审批通过
+   * 1: 进行中
+   * 2: 未通过
+   * 3: 未开始
+   * 4: 系统自动通过
    */
   updateStatus(status) {
     let point = this.$element.getElementsByClassName('workflower-point')[0]
 
-    point.className = 'workflower-point status-' + status
+    // point.className = 'workflower-point status-' + status
   }
 
   /**
@@ -130,12 +135,19 @@ export default class Node extends Watch {
               taskName = task.assigneeName ?
                 `${task.assigneeName}<div style="font-weight: lighter; font-size: 12px; opacity:.6;">(${task.taskName})</div>` :
                 task.taskName
-              taskStatus = status
+
+              console.log(task.assigneeName)
+              if (task.assigneeName) {
+                taskStatus = status
+              } else {
+                taskStatus = 4
+              }
             }
           })
         }
       } else if (this.data.taskUserList.length == 0) {
         let dataArr = []
+
         dataArr[0] = this.data.name
 
         taskName = dataArr[0]
@@ -143,15 +155,15 @@ export default class Node extends Watch {
 
         if (this.data.id == "startevent1") {
           taskName = "开始"
-          taskStatus = "1"
+          taskStatus = 4
         }
-
       }
     }
 
     let template = `
-      <div class="workflower-node type-${this.data.elementType}" id="node-${this.data.id}" data-id="${this.data.id}">
-      
+      <div class="workflower-node type-${this.data.elementType}" 
+            id="node-${this.data.id}" 
+            data-id="${this.data.id}">
         <div class="workflower-label">
           <div class="workflower-picture">
             <img class="workflower-img" width="80" data-src="" alt="">

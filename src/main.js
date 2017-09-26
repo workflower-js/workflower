@@ -123,9 +123,9 @@ class Workflow extends Watch {
 
       let node = this.resolveNode(data.id)
 
-      if (node) {
-        node.updateStatus(data.taskUserList.length > 0 ? data.taskUserList[0].taskStatus : '')
-      }
+      // if (node) {
+      //   node.updateStatus(data.taskUserList.length > 0 ? data.taskUserList[0].taskStatus : '')
+      // }
     })
 
   }
