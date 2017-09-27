@@ -137,17 +137,13 @@ export default class Node extends Watch {
               task.taskName
 
             if (status === 0 || status === 3) {
-              if (task.assigneeName) {
+              if ((task.assignee.toString()) !== '0') {
                 taskStatus = status
               } else if (status === 0) {
                 taskStatus = 4
               }
             } else {
               taskStatus = status
-            }
-
-            if (!task.assigneeName && status === 0) {
-              taskStatus = 4
             }
           })
         }

@@ -3009,18 +3009,22 @@ var Node = function (_Watch) {
           if (taskList && taskList.length > 0) {
             taskList.forEach(function (task) {
               var status = parseInt(task.taskStatus || '2');
+              var css = 'font-weight: lighter; font-size: 12px; opacity:.6;';
+
+              taskName = task.assigneeName ? task.assigneeName + '<div style="' + css + '">(' + task.taskName + ')</div>' : task.taskName;
 
               if (status === 0 || status === 3) {
-                taskName = task.assigneeName ? task.assigneeName + '<div style="font-weight: lighter; font-size: 12px; opacity:.6;">(' + task.taskName + ')</div>' : task.taskName;
-
                 if (task.assigneeName) {
                   taskStatus = status;
                 } else if (status === 0) {
                   taskStatus = 4;
                 }
               } else {
-                taskName = task.taskName;
                 taskStatus = status;
+              }
+
+              if (!task.assigneeName && status === 0) {
+                taskStatus = 4;
               }
             });
           }
