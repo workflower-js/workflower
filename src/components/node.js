@@ -116,12 +116,25 @@ export default class Node extends Watch {
     // point.className = 'workflower-point status-' + status
   }
 
+  isFirstOrLastNode() {
+    return (this.isFirstNode() || this.isLastNode())
+  }
+
+  isFirstNode() {
+    return this.data.id.match(/^startevent/)
+  }
+
+  isLastNode() {
+    return this.data.id.match(/^endevent/)
+  }
+
   /**
    *
    */
   format() {
     let taskName = ''
     let taskStatus = 2
+    let nodeData = this.data
 
     if (this.data.taskUserList != null) {
       if (this.data.taskUserList.length > 0) {
@@ -137,10 +150,10 @@ export default class Node extends Watch {
               task.taskName
 
             if (status === 0 || status === 3) {
-              if ((task.assignee.toString()) !== '0') {
-                taskStatus = status
-              } else if (status === 0) {
+              if ((task.assignee.toString()) === '0' || this.isFirstOrLastNode()) {
                 taskStatus = 4
+              } else {
+                taskStatus = status
               }
             } else {
               taskStatus = status
@@ -148,9 +161,11 @@ export default class Node extends Watch {
           })
         }
       } else if (this.data.taskUserList.length == 0) {
-
-        if (this.data.id == "startevent1") {
+        if (this.isFirstNode()) {
           taskName = "开始"
+          taskStatus = 4
+        } else if (this.isLastNode()) {
+          taskName = "结束"
           taskStatus = 4
         }
       }
