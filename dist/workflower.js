@@ -2991,6 +2991,21 @@ var Node = function (_Watch) {
 
       // point.className = 'workflower-point status-' + status
     }
+  }, {
+    key: 'isFirstOrLastNode',
+    value: function isFirstOrLastNode() {
+      return this.isFirstNode() || this.isLastNode();
+    }
+  }, {
+    key: 'isFirstNode',
+    value: function isFirstNode() {
+      return this.data.id.match(/^startevent/);
+    }
+  }, {
+    key: 'isLastNode',
+    value: function isLastNode() {
+      return this.data.id.match(/^endevent/);
+    }
 
     /**
      *
@@ -2999,8 +3014,11 @@ var Node = function (_Watch) {
   }, {
     key: 'format',
     value: function format() {
+      var _this3 = this;
+
       var taskName = '';
       var taskStatus = 2;
+      var nodeData = this.data;
 
       if (this.data.taskUserList != null) {
         if (this.data.taskUserList.length > 0) {
@@ -3014,10 +3032,10 @@ var Node = function (_Watch) {
               taskName = task.assigneeName ? task.assigneeName + '<div style="' + css + '">(' + task.taskName + ')</div>' : task.taskName;
 
               if (status === 0 || status === 3) {
-                if (task.assignee.toString() !== '0') {
-                  taskStatus = status;
-                } else if (status === 0) {
+                if (task.assignee.toString() === '0' || _this3.isFirstOrLastNode()) {
                   taskStatus = 4;
+                } else {
+                  taskStatus = status;
                 }
               } else {
                 taskStatus = status;
@@ -3025,9 +3043,11 @@ var Node = function (_Watch) {
             });
           }
         } else if (this.data.taskUserList.length == 0) {
-
-          if (this.data.id == "startevent1") {
+          if (this.isFirstNode()) {
             taskName = "开始";
+            taskStatus = 4;
+          } else if (this.isLastNode()) {
+            taskName = "结束";
             taskStatus = 4;
           }
         }
